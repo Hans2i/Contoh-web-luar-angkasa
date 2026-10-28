@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<script>
+/* [KODE: ERR-01] Penangkap salah ketik: jika PENGATURAN di bawah rusak (mis. tanda ` atau koma terhapus),
+   halaman menampilkan pesan yang jelas, bukan layar kosong. Bagian ini tidak perlu diubah. */
+(function () {
+  var first = null;
+  window.addEventListener('error', function (e) { if (!first) first = { msg: e.message, line: e.lineno }; });
+  document.addEventListener('DOMContentLoaded', function () {
+    if (typeof KARTU !== 'undefined') return;
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#1a0710;color:#fff;font:16px/1.65 system-ui,sans-serif;padding:26px;overflow:auto';
+    var h = document.createElement('h2'); h.textContent = '⚠️ Ada salah ketik di PENGATURAN KARTU'; h.style.color = '#ff9db8'; d.appendChild(h);
+    var p = document.createElement('div');
+    p.innerHTML = 'Buka file <b>index.html</b>, lihat bagian <b>PENGATURAN KARTU</b> di paling atas, lalu periksa:<ol>' +
+      '<li>Tanda <b>`</b> (backtick, tombol di kiri angka 1) di awal dan akhir setiap teks <b>tidak ada yang terhapus</b>.</li>' +
+      '<li><b>Koma ( , )</b> di ujung setiap baris tidak terhapus.</li>' +
+      '<li>Di dalam teks <b>tidak ada</b> karakter <b>`</b> atau <b>${</b>.</li>' +
+      '<li>Tanda kurung kurawal <b>{ }</b> dan <b>[ ]</b> tidak terhapus.</li></ol>';
+    d.appendChild(p);
+    if (first) { var t = document.createElement('div'); t.style.cssText = 'margin-top:14px;font:13px/1.5 monospace;color:#ffd0dd'; t.textContent = 'Pesan teknis: ' + first.msg + (first.line ? ' (sekitar baris ' + first.line + ')' : ''); d.appendChild(t); }
+    document.body.appendChild(d);
+  });
+})();
+</script>
+<!--
+##########################################################################
+#                                                                        #
+#   PENGATURAN KARTU UCAPAN   (kode: CUS-01)                             #
+#                                                                        #
+#   >>> HANYA BAGIAN INI YANG PERLU ANDA UBAH <<<                        #
+#   Semua tulisan, nama, tanggal, surat, dan doa ada di sini.            #
+#   Bagian setelah tulisan "AKHIR PENGATURAN KARTU" JANGAN disentuh.     #
+#                                                                        #
+#   CARA MENGGANTI (3 langkah)                                           #
+#   1. Cari tulisan yang ingin diganti di bawah ini.                     #
+#   2. Ganti HANYA isi di antara tanda ` ` (backtick). Jangan hapus      #
+#      tanda ` ` itu dan jangan hapus koma (,) di ujung baris.           #
+#   3. Simpan file, lalu buka/refresh di browser untuk melihat hasilnya. #
+#                                                                        #
+#   ATURAN PENTING                                                       #
+#   - Setiap kolom punya BATAS HURUF (tertulis "maks." di sebelahnya;    #
+#     spasi, emoji, dan baris kosong ikut dihitung). Jika terlalu       #
+#     panjang, teks dipotong otomatis agar tampilan tidak rusak, dan    #
+#     muncul kotak peringatan merah (selama TAMPILKAN_KODE : true).      #
+#   - Di dalam teks JANGAN memakai karakter ` dan ${                    #
+#   - Di surat, pisahkan paragraf dengan SATU BARIS KOSONG.              #
+#   - File lagu & foto harus satu folder dengan index.html ini.          #
+#   - Angka (tanggal, bulan, tahun) ditulis tanpa tanda ` `.             #
+#                                                                        #
+#   KATA AJAIB (otomatis diganti saat tampil, boleh dipakai di teks)     #
+#     {nama}          -> nama penerima (mis. Wiyaa)                      #
+#     {pemberi}       -> nama pemberi/pengirim (mis. Handres)            #
+#     {usia}          -> umur yang dirayakan (mis. 19)                   #
+#     {usia_en}       -> umur gaya Inggris (mis. 19th)                   #
+#     {tanggal}       -> tanggal ulang tahun berikutnya                  #
+#     {tanggal_lahir} -> tanggal lahir lengkap                           #
+#   (hanya {nama} {pemberi} {usia} {usia_en} yang boleh di surat/doa;    #
+#    {tanggal} dan {tanggal_lahir} hanya di kolom yang menyebutkannya.)  #
+#                                                                        #
+##########################################################################
+-->
+<script>
+const KARTU = {
+  NAMA_PEMBERI : `penggemar rahasia`,
+  NAMA_PENERIMA : `davina karamoy`,
+  TGL_LAHIR : 17,
+  BLN_LAHIR : 8,
+  THN_LAHIR : 2002,
+  USIA : null,
+  LAGU : `song.mp3`,
+  FOTO : [],
+  VOLUME_AWAL : 0.3,
+  PUZZLE_UKURAN : 3,
+  TAMPILKAN_KODE : false,
+  AKTIF_MUSIK : true,
+  AKTIF_PUZZLE : true,
+  AKTIF_SKIP : true,
+  AKTIF_STIKER : true,
+  AKTIF_FOTO_KENANGAN : true,
+  AKTIF_HITUNG_MUNDUR : true,
+  AKTIF_SURAT : true,
+  AKTIF_DOA : true,
+  AKTIF_UMUR : true,
+  JUDUL_TAB : `Happy Birthday 💗`,
+  TEKS_LOADING : `Tunggu yaa sayangg`,
+  JUDUL_PUZZLE : `Susun bintangnya dulu yaa, {nama} ✨`,
+  PETUNJUK_PUZZLE : `Geser kepingan ke ruang kosong sampai gambarnya utuh`,
+  PUZZLE_SELESAI : `Bintangnya sudah tersusun, sayang 💫`,
+  TEKS_TOMBOL_SKIP : `Skip ⏭`,
+  TEKS_TOMBOL_MASUK : `Masuk`,
+  TEKS_PERJALANAN : `Membawamu ke galaksi terindah di alam semesta…`,
+  JUDUL_GALAKSI : `Happy {usia_en} Birthday, {nama} 🎂`,
+  TEKS_HATI : `LOVE`,
+  PETUNJUK_GALAKSI_1 : `Ketuk emoji lucu di antara bintang 💫`,
+  PETUNJUK_GALAKSI_2 : `Geser, putar & zoom sesuka hatimu ✨`,
+  FOTO_KENANGAN : [`foto1.jpg`, `foto2.jpg`, `foto3.jpg`, `foto4.jpg`],
+  DURASI_FOTO : 5,
+  LABEL_FOTO : `Kenangan kita 📸`,
+  LABEL_EMOJI_HITUNG_MUNDUR : `Hitung mundur ulang tahun`,
+  LABEL_EMOJI_SURAT : `Surat ucapan ulang tahun`,
+  LABEL_EMOJI_DOA : `Harapan & doa`,
+  LABEL_EMOJI_UMUR : `Sudah berapa lama kamu di dunia`,
+  SURAT_UCAPAN_JUDUL : `Happy {usia_en} Birthday, {nama}! 💗🎂`,
+  SURAT_UCAPAN_ISI : `
+Selamat ulang tahun, {nama}. ❤️
+
+Di usia kamu yang ke-{usia} ini, aku berharap semoga banyak kebahagiaan datang ke hidup kamu, semua impian kamu perlahan terwujud, dan senyum manis kamu selalu punya alasan untuk tetap ada.
+
+Makasih ya, sayang, udah hadir di hidup aku. Kalau aku boleh berharap satu hal, aku ingin tetap jadi orang yang bisa nemenin kamu melewati banyak ulang tahun berikutnya.
+
+I love you, today, tomorrow, and in all the days to come. 💗
+
+With love, {pemberi} ♡
+`,
+  SURAT_DOA_JUDUL : `My Wishes & Prayers for You 💗`,
+  SURAT_DOA_ISI : `
+Di usia kamu yang ke-{usia} ini, aku berdoa semoga kamu selalu diberi kesehatan, kebahagiaan, dan kemudahan dalam setiap langkah. Semoga kuliah kamu lancar, impian kamu satu per satu terwujud, dan kamu selalu dikelilingi hal-hal baik.
+
+Kalau suatu hari kamu lelah, semoga kamu selalu punya alasan untuk tersenyum lagi. Aku juga berharap, semoga kita bisa terus bersama, saling menguatkan, dan merayakan lebih banyak ulang tahun bersama.
+
+Semoga dunia selalu baik sama kamu, sayang. Dan kalau suatu saat dunia terasa berat, semoga aku bisa menjadi salah satu alasan kamu tetap tersenyum. ❤️
+
+Always wishing the best for you,
+{pemberi} ♡
+`,
+  JUDUL_HITUNG_MUNDUR : `Hitung Mundur Ulang Tahun ⏳`,
+  SUB_HITUNG_MUNDUR : `Menuju {tanggal}, hari ketika {nama} genap {usia} tahun.`,
+  COUNTDOWN_HARI_H : `Hari ini hari spesialmu, selamat ulang tahun sayang! 🎉`,
+  COUNTDOWN_BELUM : `Sedikit lagi, sayang… aku sudah tidak sabar. 💗`,
+  UNIT_HARI : `HARI`,
+  UNIT_JAM : `JAM`,
+  UNIT_MENIT : `MENIT`,
+  UNIT_DETIK : `DETIK`,
+  JUDUL_UMUR : `Perjalananmu di Dunia 🧸`,
+  SUB_UMUR : `Sejak pertama kali {nama} lahir pada {tanggal_lahir}, kamu sudah melewati:`,
+  PENUTUP_UMUR : `Dan di setiap detik itu, kamu selalu berharga banget buat aku. 💗`,
+  UNIT_TAHUN : `TAHUN`,
+  UNIT_BULAN : `BULAN`,
+  TOTAL_HARI : `Total hari`,
+  TOTAL_JAM : `Total jam`,
+  TOTAL_MENIT : `Total menit`,
+  TOTAL_DETIK : `Total detik`,
+  TEKS_GAMBAR_ATAS : `Happy {usia_en} Birthday`,
+  TEKS_GAMBAR_BAWAH : `with love, {pemberi} ♡`
+};
+</script>
+<!-- ######################## AKHIR PENGATURAN KARTU ######################## -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Happy Birthday 💗</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!--
+==========================================================================
+ PETA KODE REVISI  (format: 1 angka + 1 huruf, mis. "4D")
+ Sebut kodenya ke AI, misal: "ubah 4D" atau "perbesar 5A".
+ Kode layar yang sedang tampil (1A loading, 2A puzzle, 3A perjalanan, 4A galaksi,
+ 6C-6F jendela) muncul kecil di POJOK KIRI BAWAH.
+ Tekan tombol "</>" di kiri bawah (atau tombol K) untuk menampilkan label
+ kode tepat di atas tiap elemen. Setel TAMPILKAN_KODE:false di CUS-01
+ sebelum kartu dikirim ke pelanggan.
+
+ 1  LAYAR LOADING        1A layar  1B tulisan "Tunggu yaa"  1C wadah persen+bar
+                         1D angka persen  1E bar  1F catatan/pesan error
+ 2  LAYAR PUZZLE (3x3)   2A layar  2B judul  2C petunjuk  2D papan puzzle
+                         2E slot tombol  2F tombol Skip  2G tombol Masuk
+ 3  PERJALANAN (WARP)    3A layar  3B tulisan perjalanan  (garis bintang = WRP-10)
+ 4  GALAKSI & HATI       4A kanvas 3D, bintang latar, Bima Sakti, nebula
+                         4B galaksi spiral   4C lubang kecil + inti bercahaya
+                         4D asap bintang yang membentuk hati   4E tulisan LOVE
+                         4F judul "Happy Birthday"   4G petunjuk bawah
+                         4H kontrol 3D (geser, putar, zoom)
+                         4I foto polaroid (tali + 4 foto, muncul saat tulisan di hati diketuk)
+ 5  EMOJI (STIKER LUCU)  5A hitung mundur  5B surat ucapan  5C harapan & doa
+                         5D umur sejak lahir  5E stiker dekorasi
+ 6  JENDELA (MODAL)      6A jendela  6B tombol tutup  6C isi hitung mundur
+                         6D isi surat ucapan  6E isi harapan & doa  6F isi umur
+ 7  MUSIK                7A wadah  7B play/pause  7C slider volume
+ 8  PENGATURAN           8A blok CUS-01 di paling atas file (nama, tanggal, surat, dst)
+ 9  ALAT                 9A tombol "</>" label kode
+
+ Kode lama (untuk mencari di komentar [KODE: ...] pada CSS/JS):
+ CUS-01 = 8A | CFG-01 konfigurasi teknis | DAT-01 penerapan data | TYP-01 mesin ketik
+ FADE-01 animasi masuk/keluar | LOAD-10 download lagu & foto | PZL-10 logika puzzle
+ PZL-11 gambar puzzle | PZL-12 tombol skip 5 detik | PZL-13 tombol Masuk
+ GLX-01/02 = 4A | GLX-03 = 4B | GLX-04/GLX-05 = 4C | HRT-01 = 4D | HRT-02 = 4E
+ HRT-03 = 4F | HNT-01 = 4G | CTL-01 = 4H | MEM-01 = 4I | ICN-01 sistem stiker | ICN-DEC = 5E
+ AUD = 7A-7C | MOD = 6A-6F | KOD-01 = 9A
+ CUS-02 = pemeriksa batas huruf & angka | ERR-01 = penangkap salah ketik pada pengaturan
+==========================================================================
+-->
+
+<style>
+/* [KODE: CUS-02] kotak peringatan batas huruf (hanya tampil saat TAMPILKAN_KODE : true) */
+#admin-warn{position:fixed;left:10px;top:10px;z-index:9999;max-width:min(94vw,540px);padding:12px 40px 12px 14px;border-radius:12px;
+  background:rgba(120,15,45,.95);border:1px solid #ff9db8;color:#fff;font:600 12.5px/1.55 system-ui,sans-serif;text-align:left;box-shadow:0 6px 30px rgba(0,0,0,.55)}
+#admin-warn b{display:block;margin-bottom:4px;color:#ffd0dd}
+#admin-warn div{margin-top:2px}
+#admin-warn button{position:absolute;top:6px;right:8px;background:none;border:0;color:#fff;font-size:20px;line-height:1;cursor:pointer}
+/* [KODE: CFG-STYLE] Variabel warna */
+:root{
+  --pink:#ff7eb6; --violet:#a98bff; --cyan:#7fd8ff;
+  --glass:rgba(14,10,40,.58); --line:rgba(255,255,255,.16);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#01020a;color:#fff;
+  font-family:'Quicksand',system-ui,-apple-system,'Segoe UI',sans-serif}
+.dance{font-family:'Dancing Script','Segoe Script','Brush Script MT',cursive;font-weight:700}
+
+/* [KODE: GLX-00] kanvas 3D */
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;touch-action:none;outline:none}
+
+/* [KODE: FADE-01] animasi masuk/keluar umum */
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:16px;text-align:center;opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity 1.2s ease,visibility 0s linear 1.2s}
+.screen.show{opacity:1;visibility:visible;pointer-events:auto;transition:opacity 1.2s ease,visibility 0s}
+#warp{pointer-events:none!important}
+.fx{opacity:0;transform:translateY(14px);transition:opacity 1.1s ease,transform 1.1s ease;pointer-events:none}
+.fx.in{opacity:1;transform:none;pointer-events:auto}
+.caret{display:inline-block;width:2px;height:1.05em;background:currentColor;margin-left:3px;margin-right:-5px;vertical-align:-.15em;animation:blink .8s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.glow{text-shadow:0 0 18px rgba(255,126,182,.75),0 0 42px rgba(169,139,255,.55)}
+
+/* [KODE: LOAD-01] layar loading */
+#load-title{font-size:clamp(34px,8vw,60px);margin:0 0 26px;min-height:1.3em}
+#load-wrap{width:min(320px,80vw)}
+#load-pct{font-size:26px;font-weight:700;letter-spacing:1px;margin-bottom:12px;font-variant-numeric:tabular-nums}
+#load-bar{height:10px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden;border:1px solid var(--line)}
+#load-fill{display:block;height:100%;width:0;border-radius:99px;
+  background:linear-gradient(90deg,#7fd8ff,#a98bff,#ff7eb6);box-shadow:0 0 14px rgba(255,126,182,.8)}
+#load-note{margin-top:18px;min-height:1.4em;font-size:14px;color:#ffd1e6;max-width:80vw;line-height:1.6}
+
+/* [KODE: PZL-01] layar puzzle
+   Tata letak 3 baris: teks (2B+2C) rata tengah di antara tepi atas & papan, papan (2D) di tengah layar,
+   tombol (2E-2G) rata tengah di antara papan & tepi bawah. */
+#puzzle{display:grid;grid-template-rows:minmax(0,1fr) auto minmax(0,1fr);grid-template-columns:100%;justify-items:center;align-items:center}
+#pzl-top{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;max-width:92vw}
+#pzl-bottom{display:flex;align-items:center;justify-content:center;width:100%}
+#puzzle #pzl-title{margin:0 0 6px}
+#puzzle #pzl-sub{margin:0}
+#puzzle .btn-slot{margin-top:0}
+#pzl-title{font-size:clamp(28px,6vw,46px);margin:0 0 6px;min-height:1.3em}
+#pzl-sub{margin:0 0 16px;font-size:15px;color:#dcd2ff;min-height:1.4em}
+#pzl-board{--bs:480px;position:relative;width:var(--bs);height:var(--bs);border-radius:14px;
+  background:rgba(255,255,255,.05);box-shadow:0 0 0 1px var(--line),0 20px 70px rgba(120,70,255,.35),0 0 60px rgba(255,126,182,.18);touch-action:manipulation}
+.tile{position:absolute;cursor:pointer;transition:left .24s ease,top .24s ease,opacity 1.2s ease,box-shadow 1.2s ease;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);user-select:none}
+.tile:hover{filter:brightness(1.18)}
+.tile.ghost{opacity:0;pointer-events:none}
+#pzl-board.solved .tile{box-shadow:inset 0 0 0 0 rgba(255,255,255,0)}
+#pzl-board.solved .tile.ghost{opacity:1}
+.btn-slot{display:grid;place-items:center;height:64px;width:100%;margin-top:16px}
+.btn-slot>*{grid-area:1/1}
+.btn{font-family:inherit;color:#fff;font-weight:600;font-size:15px;padding:11px 26px;border-radius:99px;cursor:pointer;
+  background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 0 22px rgba(169,139,255,.3);transition:opacity 1.1s ease,transform 1.1s ease,box-shadow .3s}
+.btn:hover{box-shadow:0 0 30px rgba(255,126,182,.6)}
+.btn.big{font-size:24px;padding:13px 54px;background:linear-gradient(135deg,rgba(255,126,182,.55),rgba(169,139,255,.55));
+  box-shadow:0 0 34px rgba(255,126,182,.55)}
+.btn span{display:inline-block;min-width:1ch;min-height:1.2em}
+
+/* [KODE: AUD-01] kontrol musik kanan atas */
+#audio{position:fixed;top:14px;right:14px;z-index:60;display:flex;align-items:center;gap:10px;padding:7px 14px 7px 8px;
+  border-radius:99px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+#a-toggle{width:34px;height:34px;border-radius:50%;border:0;cursor:pointer;color:#fff;display:grid;place-items:center;
+  background:linear-gradient(135deg,#ff7eb6,#a98bff);box-shadow:0 0 14px rgba(255,126,182,.6)}
+#a-toggle svg{width:16px;height:16px;fill:#fff}
+#a-toggle .i-pause{display:none}
+#audio.playing #a-toggle .i-pause{display:block}
+#audio.playing #a-toggle .i-play{display:none}
+#a-vol{-webkit-appearance:none;appearance:none;width:92px;height:4px;border-radius:9px;background:rgba(255,255,255,.28);outline:none;cursor:pointer}
+#a-vol::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 0 10px #ff7eb6}
+#a-vol::-moz-range-thumb{width:14px;height:14px;border:0;border-radius:50%;background:#fff;box-shadow:0 0 10px #ff7eb6}
+
+/* [KODE: WRP-01] teks perjalanan warp */
+#warp-text{font-size:clamp(22px,4.6vw,38px);max-width:88vw;line-height:1.5;min-height:1.5em;margin:0}
+
+/* [KODE: HRT-03] judul 3D & [KODE: HNT-01] petunjuk */
+#memo{position:fixed;inset:0;z-index:18;background:rgba(5,2,18,0);-webkit-backdrop-filter:blur(0);backdrop-filter:blur(0);pointer-events:none;
+  transition:background 1s ease,-webkit-backdrop-filter 1s ease,backdrop-filter 1s ease}
+#memo.on{background:rgba(5,2,18,.42);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);pointer-events:auto}
+#memo-rail{position:fixed;left:0;right:0;bottom:0;top:0;z-index:19;overflow:hidden;pointer-events:none;opacity:0;transition:opacity .7s ease}
+body.memo-on #memo-rail{opacity:1}
+.mknot{z-index:3;position:absolute;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#ffb3d9 60%,#e0629f);box-shadow:0 0 10px rgba(255,150,220,.8)}
+.mstring{z-index:1;position:absolute;left:0;top:0;width:2px;margin-left:-1px;transform-origin:50% 0;background:linear-gradient(#fff4fb,#d9c2ff);box-shadow:0 0 6px rgba(255,190,235,.55);display:none}
+.mcard{z-index:2;position:absolute;left:0;top:0;width:0;height:0;display:none;will-change:transform}
+.mpol{position:absolute;top:0;background:#fffaf5;border-radius:3px;box-sizing:border-box;transform-origin:50% 0;box-shadow:0 12px 30px rgba(0,0,0,.55),0 0 22px rgba(255,170,225,.25)}
+.mpol img{display:block;width:100%;height:100%;object-fit:cover;border-radius:1px;background:#e9e1e8;user-select:none;-webkit-user-drag:none}
+.mpin{position:absolute;left:50%;top:-7px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#ff9fcd 55%,#d9468f);box-shadow:0 2px 5px rgba(0,0,0,.5)}
+#audio,#kode-btn{transition:opacity .6s ease}
+body.memo-on #hint,body.memo-on #audio,body.memo-on #kode-btn,body.memo-on #kode-now{opacity:0!important;pointer-events:none!important}
+#title3d{position:fixed;top:12vh;transform:translateY(-50%);left:0;right:0;z-index:20;text-align:center;pointer-events:none;padding:0 16px;
+  font-size:clamp(26px,5.2vw,52px);min-height:1.3em;opacity:0;transition:opacity 1s ease}
+#title3d.in{opacity:1}
+#hint{position:fixed;bottom:4.5vh;left:0;right:0;z-index:20;text-align:center;pointer-events:none;font-size:15px;color:#e5dcff;
+  padding:0 16px;min-height:1.4em;opacity:0;transition:opacity .9s ease;white-space:pre-line;line-height:1.7}
+#hint.in{opacity:1}
+#tip{position:fixed;z-index:30;pointer-events:none;padding:6px 14px;border-radius:99px;font-size:14px;font-weight:600;white-space:nowrap;
+  background:rgba(10,8,34,.78);border:1px solid var(--line);opacity:0;transition:opacity .3s;transform:translate(-50%,-170%)}
+#tip.in{opacity:1}
+
+/* [KODE: MOD-01] jendela modal */
+#modal{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:14px;
+  visibility:hidden;pointer-events:none;transition:visibility 0s linear .8s}
+#modal::before{content:'';position:absolute;inset:0;background:rgba(2,2,14,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  opacity:0;transition:opacity .6s ease}
+#modal.show{visibility:visible;pointer-events:auto;transition:visibility 0s}
+#modal.show::before{opacity:1}
+/* [KODE: MOD-ANIM] panel dianimasikan lewat JS (Modal.play): tumbuh dari emoji yang diketuk, menyusut kembali saat ditutup */
+#panel{position:relative;z-index:1;width:min(94vw,580px);min-height:min(60vh,380px);max-height:84vh;overflow:auto;padding:30px 26px 28px;border-radius:22px;
+  background:linear-gradient(160deg,rgba(40,20,90,.78),rgba(12,8,38,.86));border:1px solid var(--line);
+  box-shadow:0 0 60px rgba(169,139,255,.35),0 0 30px rgba(255,126,182,.2);will-change:transform,opacity}
+#panel::-webkit-scrollbar{width:6px}#panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.25);border-radius:9px}
+/* [KODE: MOD-02] tombol tutup */
+#mclose{position:sticky;float:right;top:-14px;margin:-18px -10px 0 0;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);
+  background:rgba(255,255,255,.1);color:#fff;font-size:15px;cursor:pointer;z-index:2}
+#mclose:hover{background:rgba(255,126,182,.4)}
+.m-title{font-size:clamp(26px,5.6vw,34px);margin:0 0 14px;min-height:1.3em;line-height:1.25;text-wrap:balance}
+.m-sub{font-size:15.5px;line-height:1.7;color:#e6dcff;margin:0 0 16px;min-height:1.5em}
+.paper p{white-space:pre-line;font-size:17px;line-height:1.95;margin:0 0 18px;color:#fff4fa}
+.cd-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:10px 0 18px}
+.cd-grid.three{grid-template-columns:repeat(3,1fr)}
+.cd-box{padding:14px 4px 10px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid var(--line);text-align:center}
+.cd-box b{display:block;font-size:clamp(26px,7vw,40px);font-variant-numeric:tabular-nums;line-height:1.1;
+  background:linear-gradient(135deg,#ffd1e6,#cbb8ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cd-box small{font-size:12px;color:#d9ceff;letter-spacing:.5px}
+.m-foot{font-size:15px;line-height:1.7;color:#ffd7ea;margin:6px 0 0;min-height:1.4em}
+.totals{display:grid;gap:6px;font-size:14.5px;color:#e6dcff;margin:6px 0 14px;font-variant-numeric:tabular-nums}
+.totals div{padding:8px 12px;border-radius:12px;background:rgba(255,255,255,.07);display:flex;justify-content:space-between;gap:10px}
+.totals div b{color:#ffd1e6}
+
+/* [KODE: KOD-01] label kode */
+#kode-btn{position:fixed;left:12px;bottom:12px;z-index:70;width:34px;height:28px;border-radius:9px;border:1px solid var(--line);
+  background:rgba(10,8,34,.5);color:#cbb8ff;font-size:12px;cursor:pointer;opacity:.35;transition:opacity .3s}
+#kode-btn:hover,body.show-kode #kode-btn{opacity:1}
+body.show-kode [data-kode]{outline:1px dashed rgba(80,255,210,.75);outline-offset:2px}
+.kbadge{position:fixed;z-index:80;pointer-events:none;font:600 10px/1 monospace;color:#001a14;background:#5dffd6;padding:2px 5px;border-radius:4px;white-space:nowrap}
+#kode-now{position:fixed;left:52px;bottom:17px;z-index:70;font:600 10px/1 monospace;color:#5dffd6;opacity:.6;pointer-events:none;letter-spacing:.5px;white-space:nowrap;transition:opacity .25s ease}
+body.no-kode #kode-btn,body.no-kode #kode-now{display:none}
+noscript{position:fixed;inset:0;z-index:99;display:grid;place-items:center;background:#01020a;color:#fff;padding:20px;text-align:center}
+
+@media (max-width:520px){#audio{top:10px;right:10px;padding:6px 12px 6px 6px;gap:8px}#a-vol{width:70px}#panel{padding:26px 18px 22px}.paper p{font-size:16px}
+  #pzl-title{font-size:clamp(24px,6.6vw,30px)}#pzl-sub{font-size:13.5px;margin-bottom:12px}
+  .btn-slot{height:54px;margin-top:10px}.btn.big{font-size:21px;padding:11px 44px}}
+</style>
+</head>
+<body>
+<noscript>Aktifkan JavaScript untuk membuka kejutan ini 💗</noscript>
+
+<canvas id="gl" data-kode="4A"></canvas>
+
+<!-- [KODE: LOAD-01] LAYAR LOADING -->
+<section id="loader" class="screen" data-kode="1A">
+  <h1 id="load-title" class="dance glow" data-kode="1B"></h1>
+  <div id="load-wrap" class="fx" data-kode="1C">
+    <div id="load-pct" data-kode="1D">0%</div>
+    <div id="load-bar" data-kode="1E"><i id="load-fill"></i></div>
+  </div>
+  <div id="load-note" data-kode="1F"></div>
+</section>
+
+<!-- [KODE: PZL-01] LAYAR PUZZLE -->
+<section id="puzzle" class="screen" data-kode="2A">
+  <div id="pzl-top">
+    <h2 id="pzl-title" class="dance glow" data-kode="2B"></h2>
+    <p id="pzl-sub" data-kode="2C"></p>
+  </div>
+  <div id="pzl-board" class="fx" data-kode="2D"></div>
+  <div id="pzl-bottom">
+    <div class="btn-slot" data-kode="2E">
+      <button id="btn-skip" class="btn fx" data-kode="2F"><span></span></button>
+      <button id="btn-masuk" class="btn big fx" data-kode="2G"><span></span></button>
+    </div>
+  </div>
+</section>
+
+<!-- [KODE: WRP-01] LAYAR PERJALANAN WARP -->
+<section id="warp" class="screen" data-kode="3A">
+  <p id="warp-text" class="dance glow" data-kode="3B"></p>
+</section>
+
+<!-- [KODE: AUD-01] KONTROL MUSIK -->
+<div id="audio" class="fx" data-kode="7A">
+  <button id="a-toggle" aria-label="Putar atau jeda musik" data-kode="7B">
+    <svg class="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    <svg class="i-pause" viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+  </button>
+  <input id="a-vol" type="range" min="0" max="1" step="0.01" value="0.6" aria-label="Volume" data-kode="7C">
+</div>
+
+<div id="memo"></div>
+<div id="memo-rail" data-kode="4I"></div>
+<div id="title3d" class="dance glow" data-kode="4F"></div>
+<div id="hint" data-kode="4G"></div>
+<div id="tip"></div>
+
+<!-- [KODE: MOD-01] MODAL -->
+<div id="modal" data-kode="6A">
+  <div id="panel">
+    <button id="mclose" aria-label="Tutup" data-kode="6B">✕</button>
+    <div id="mcontent"></div>
+  </div>
+</div>
+
+<div id="kode-now"></div>
+<button id="kode-btn" title="Tampilkan / sembunyikan label kode (K)" data-kode="9A">&lt;/&gt;</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+'use strict';
+/* ========================================================================
+   [KODE: CUS-02] PEMERIKSA PENGATURAN: batas huruf, angka, dan nilai bawaan.
+   Teks yang terlalu panjang dipotong otomatis supaya tampilan tidak rusak.
+   (Angka batas ada di BATAS di bawah ini; sebaiknya tidak diubah.)
+   ======================================================================== */
+const BATAS = {
+  NAMA_PEMBERI: 20, NAMA_PENERIMA: 20,
+  JUDUL_TAB: 40, TEKS_LOADING: 40, JUDUL_PUZZLE: 60, PETUNJUK_PUZZLE: 80, PUZZLE_SELESAI: 50,
+  TEKS_TOMBOL_SKIP: 12, TEKS_TOMBOL_MASUK: 12, TEKS_PERJALANAN: 70,
+  JUDUL_GALAKSI: 50, TEKS_HATI: 8, PETUNJUK_GALAKSI_1: 50, PETUNJUK_GALAKSI_2: 50,
+  LABEL_EMOJI_HITUNG_MUNDUR: 40, LABEL_EMOJI_SURAT: 40, LABEL_EMOJI_DOA: 40, LABEL_EMOJI_UMUR: 40,
+  SURAT_UCAPAN_JUDUL: 50, SURAT_UCAPAN_ISI: 800, SURAT_DOA_JUDUL: 50, SURAT_DOA_ISI: 800,
+  JUDUL_HITUNG_MUNDUR: 40, SUB_HITUNG_MUNDUR: 100, COUNTDOWN_HARI_H: 80, COUNTDOWN_BELUM: 80,
+  UNIT_HARI: 10, UNIT_JAM: 10, UNIT_MENIT: 10, UNIT_DETIK: 10,
+  JUDUL_UMUR: 40, SUB_UMUR: 120, PENUTUP_UMUR: 100, UNIT_TAHUN: 10, UNIT_BULAN: 10,
+  TOTAL_HARI: 14, TOTAL_JAM: 14, TOTAL_MENIT: 14, TOTAL_DETIK: 14,
+  TEKS_GAMBAR_ATAS: 30, TEKS_GAMBAR_BAWAH: 35, LABEL_FOTO: 40
+};
+/* nilai bawaan jika sebuah baris terhapus/kosong (surat & doa sengaja tidak punya nilai bawaan) */
+const KARTU_DEF = {
+  JUDUL_TAB: 'Happy Birthday 💗', TEKS_LOADING: 'Tunggu yaa', JUDUL_PUZZLE: 'Susun bintangnya dulu yaa, {nama} ✨',
+  PETUNJUK_PUZZLE: 'Geser kepingan ke ruang kosong sampai gambarnya utuh', PUZZLE_SELESAI: 'Bintangnya sudah tersusun 💫',
+  TEKS_TOMBOL_SKIP: 'Skip ⏭', TEKS_TOMBOL_MASUK: 'Masuk', TEKS_PERJALANAN: 'Membawamu ke galaksi terbesar di alam semesta…',
+  JUDUL_GALAKSI: 'Happy {usia_en} Birthday, {nama}', TEKS_HATI: 'LOVE',
+  LABEL_EMOJI_HITUNG_MUNDUR: 'Hitung mundur ulang tahun', LABEL_EMOJI_SURAT: 'Surat ucapan ulang tahun',
+  LABEL_EMOJI_DOA: 'Harapan & doa', LABEL_EMOJI_UMUR: 'Sudah berapa lama kamu di dunia',
+  JUDUL_HITUNG_MUNDUR: 'Hitung Mundur Ulang Tahun ⏳', SUB_HITUNG_MUNDUR: 'Menuju {tanggal}, hari ketika {nama} genap {usia} tahun.',
+  COUNTDOWN_HARI_H: 'Hari ini hari spesialmu, selamat ulang tahun! 🎉', COUNTDOWN_BELUM: 'Sedikit lagi… aku sudah tidak sabar. 💗',
+  UNIT_HARI: 'HARI', UNIT_JAM: 'JAM', UNIT_MENIT: 'MENIT', UNIT_DETIK: 'DETIK', UNIT_TAHUN: 'TAHUN', UNIT_BULAN: 'BULAN',
+  JUDUL_UMUR: 'Perjalananmu di Dunia 🧸', SUB_UMUR: 'Sejak pertama kali {nama} lahir pada {tanggal_lahir}, kamu sudah melewati:',
+  PENUTUP_UMUR: 'Dan di setiap detik itu, kamu selalu berharga buat aku. 💗',
+  TOTAL_HARI: 'Total hari', TOTAL_JAM: 'Total jam', TOTAL_MENIT: 'Total menit', TOTAL_DETIK: 'Total detik',
+  TEKS_GAMBAR_ATAS: 'Happy {usia_en} Birthday', TEKS_GAMBAR_BAWAH: 'with love, {pemberi} ♡', LABEL_FOTO: 'Kenangan kita 📸'
+};
+const KARTU_WARN = [];
+(function prepKartu() {
+  const K = KARTU, N = t => Array.from(t).length;
+  const cutText = (t, max) => {
+    let a = Array.from(t).slice(0, max - 1).join(''); const sp = a.lastIndexOf(' ');
+    if (sp > max * .6) a = a.slice(0, sp);
+    return a.replace(/[\s,;:.\-]+$/, '') + '…';
+  };
+  for (const k in KARTU_DEF) if (K[k] == null || String(K[k]).trim() === '') K[k] = KARTU_DEF[k];
+  for (const k in BATAS) {
+    let v = String(K[k] == null ? '' : K[k]).replace(/\r/g, '').replace(/^\uFEFF/, '').trim();
+    if (N(v) > BATAS[k]) { KARTU_WARN.push(k + ' : ' + N(v) + ' huruf, batasnya ' + BATAS[k] + ' → dipotong otomatis'); v = cutText(v, BATAS[k]); }
+    K[k] = v;
+  }
+  const num = (k, min, max, def, label) => {
+    const v = Number(K[k]);
+    if (!Number.isFinite(v) || v < min || v > max || K[k] === null || K[k] === '') { KARTU_WARN.push(k + ' : nilai "' + K[k] + '" tidak valid (harus ' + min + '–' + max + ') → dipakai ' + def); K[k] = def; }
+    else K[k] = v;
+  };
+  num('BLN_LAHIR', 1, 12, 12); num('TGL_LAHIR', 1, 31, 25);
+  const dim = new Date(2024, K.BLN_LAHIR, 0).getDate();
+  if (K.TGL_LAHIR > dim) { KARTU_WARN.push('TGL_LAHIR : bulan ke-' + K.BLN_LAHIR + ' hanya punya ' + dim + ' hari → dipakai ' + dim); K.TGL_LAHIR = dim; }
+  const thn = Number(K.THN_LAHIR);
+  if (K.THN_LAHIR !== null && K.THN_LAHIR !== '' && !(thn >= 1900 && thn <= new Date().getFullYear())) { KARTU_WARN.push('THN_LAHIR : "' + K.THN_LAHIR + '" tidak valid → diabaikan'); K.THN_LAHIR = null; }
+  if (K.USIA !== null && K.USIA !== undefined && K.USIA !== '' && !(Number(K.USIA) >= 1 && Number(K.USIA) <= 150)) { KARTU_WARN.push('USIA : "' + K.USIA + '" tidak valid → dihitung otomatis'); K.USIA = null; }
+  num('VOLUME_AWAL', 0, 1, .6);
+  K.PUZZLE_UKURAN = Math.round(Number(K.PUZZLE_UKURAN)); num('PUZZLE_UKURAN', 2, 5, 3);
+  if (!Array.isArray(K.FOTO)) { KARTU_WARN.push('FOTO : harus berbentuk daftar, mis. [`foto1.jpg`] → diabaikan'); K.FOTO = []; }
+  if (K.AKTIF_FOTO_KENANGAN === false) K.FOTO_KENANGAN = [];
+  if (K.FOTO_KENANGAN === undefined || K.FOTO_KENANGAN === null) K.FOTO_KENANGAN = [];
+  if (!Array.isArray(K.FOTO_KENANGAN)) { KARTU_WARN.push('FOTO_KENANGAN : harus berbentuk daftar, mis. [`foto1.jpg`, `foto2.jpg`] → fitur foto dimatikan'); K.FOTO_KENANGAN = []; }
+  K.FOTO_KENANGAN = K.FOTO_KENANGAN.map(v => String(v == null ? '' : v).trim()).filter(Boolean);
+  if (K.FOTO_KENANGAN.length > 6) { KARTU_WARN.push('FOTO_KENANGAN : maksimal 6 foto → hanya 6 pertama dipakai'); K.FOTO_KENANGAN = K.FOTO_KENANGAN.slice(0, 6); }
+  num('DURASI_FOTO', 1, 30, 5);
+  K.LAGU = String(K.LAGU || '').trim();
+  /* kotak peringatan merah: hanya saat MODE UJI (TAMPILKAN_KODE : true) */
+  if (KARTU_WARN.length) {
+    console.warn('[PENGATURAN KARTU]\n' + KARTU_WARN.join('\n'));
+    if (K.TAMPILKAN_KODE !== false) {
+      const box = document.createElement('div'); box.id = 'admin-warn';
+      const h = document.createElement('b'); h.textContent = '⚠️ Ada isian yang perlu diperbaiki di PENGATURAN KARTU:'; box.appendChild(h);
+      KARTU_WARN.forEach(w => { const d = document.createElement('div'); d.textContent = '• ' + w; box.appendChild(d); });
+      const x = document.createElement('button'); x.textContent = '×'; x.setAttribute('aria-label', 'Tutup peringatan'); x.onclick = () => box.remove(); box.appendChild(x);
+      document.body.appendChild(box);
+    }
+  }
+})();
+/* menerjemahkan "kata ajaib" seperti {nama} menjadi isi sebenarnya */
+function fill(str, extra) {
+  const v = Object.assign({ nama: DATA.name, pemberi: DATA.giver, usia: DATA.age || '', usia_en: DATA.age ? DATA.age + ordinal(DATA.age) : '' }, extra || {});
+  return String(str == null ? '' : str).replace(/\{(\w+)\}/g, (m, k) => (k in v ? v[k] : m)).replace(/(\S) {2,}(\S)/g, '$1 $2').trim();
+}
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* ========================================================================
+   [KODE: CFG-01] KONFIGURASI TEKNIS (nama, teks, lagu, foto ada di CUS-01 paling atas file)
+   ======================================================================== */
+const CFG = {
+  SONG_FILE : (KARTU.AKTIF_MUSIK === false ? '' : KARTU.LAGU) || '',                // diatur di CUS-01 (paling atas file)
+  MEMO      : KARTU.FOTO_KENANGAN || [],       // foto polaroid (di-download saat loading)
+  IMAGES    : KARTU.FOTO || [],                // diatur di CUS-01 (di-download saat loading)
+  TYPE_MS   : 55,        // jeda per huruf (ms). ~18 huruf/detik ≈ kecepatan baca rata-rata orang Indonesia
+  PAUSE_END : 260,       // jeda tambahan setelah . ! ?
+  PAUSE_MID : 120,       // jeda tambahan setelah , ; :
+  PAUSE_NL  : 380,       // jeda tambahan setelah baris baru
+  SKIP_DELAY: 5000,      // tombol skip muncul 5 detik SETELAH mulai bermain puzzle
+  PUZZLE_N  : KARTU.PUZZLE_UKURAN || 3,   // ukuran puzzle (default 3x3), diatur di CUS-01
+  SHUFFLE   : 20 * (KARTU.PUZZLE_UKURAN || 3), // jumlah langkah acak (makin besar makin sulit)
+  VOLUME    : KARTU.VOLUME_AWAL
+};
+const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent) || Math.min(innerWidth, innerHeight) < 600;
+const Q = IS_MOBILE
+  ? {disc:32000,bulge:9000,halo:2500,haze:3000,dust:4000,bgStars:7000,bgBand:6000,hOut:1600,hIn:800,hFill:2600,hText:1100,hSmoke:350}
+  : {disc:75000,bulge:22000,halo:6000,haze:8000,dust:10000,bgStars:9000,bgBand:10000,hOut:2600,hIn:1400,hFill:4200,hText:1800,hSmoke:700};
+
+/* ========================= UTIL ========================= */
+const $ = s => document.querySelector(s);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const rand = (a, b) => a + Math.random() * (b - a);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const smooth = (a, b, v) => { const t = clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const easeIO3 = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const easeOutBack = t => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+function gauss() { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+const MONTHS = ['januari','februari','maret','april','mei','juni','juli','agustus','september','oktober','november','desember'];
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+function ordinal(n) { const m = n % 100; if (m >= 11 && m <= 13) return 'th'; return ({1:'st',2:'nd',3:'rd'})[n % 10] || 'th'; }
+const state = { stage: 'loading' };
+
+/* ========================================================================
+   [KODE: TYP-01] MESIN ANIMASI MENGETIK
+   ======================================================================== */
+/* judul jendela dikecilkan otomatis agar muat 1 baris; jika tetap tak muat, dibagi 2 baris seimbang SEBELUM mengetik (tidak pindah baris saat diketik) */
+async function fitTitle(el, text) {
+  try { await document.fonts.ready; } catch (e) {}
+  el.style.fontSize = ''; el.style.whiteSpace = 'nowrap';
+  const sp = document.createElement('span'); sp.textContent = text; el.textContent = ''; el.appendChild(sp);
+  const room = el.clientWidth - 46;                      // sisakan tempat untuk tombol tutup
+  let fs = parseFloat(getComputedStyle(el).fontSize);
+  while (sp.offsetWidth > room && fs > 21) { fs -= 1; el.style.fontSize = fs + 'px'; }
+  if (sp.offsetWidth > room) { el.style.fontSize = ''; el.style.whiteSpace = ''; }
+}
+async function typeEl(el, text, opt = {}) {
+  const tok = opt.tok || { cancel: false };
+  const speed = opt.speed || CFG.TYPE_MS;
+  text = text.replace(/[ \t]+((?:\p{Extended_Pictographic}|\uFE0F|\u200D)+)$/u, '\u00A0$1');   // emoji di ujung selalu menempel dengan kata terakhir
+  if (el.classList.contains('m-title')) { await fitTitle(el, text); if (tok.cancel) return false; }
+  el.textContent = '';
+  const node = document.createTextNode('');
+  const caret = document.createElement('span'); caret.className = 'caret';
+  const rest = document.createElement('span'); rest.style.visibility = 'hidden'; rest.textContent = text;   // sisa teks: tak terlihat, tapi sudah memakan tempat
+  el.appendChild(node); el.appendChild(caret); el.appendChild(rest);
+  const chars = Array.from(text); let buf = '';
+  for (let n = 0; n < chars.length; n++) {
+    const ch = chars[n];
+    if (tok.cancel) { caret.remove(); return false; }
+    buf += ch; node.nodeValue = buf; rest.textContent = chars.slice(n + 1).join('');
+    if (opt.scroll) opt.scroll.scrollTop = opt.scroll.scrollHeight;
+    let d = speed;
+    if ('.!?'.includes(ch)) d += CFG.PAUSE_END;
+    else if (',;:'.includes(ch)) d += CFG.PAUSE_MID;
+    else if (ch === '\n') d += CFG.PAUSE_NL;
+    await sleep(d);
+  }
+  rest.remove();
+  if (!opt.keepCaret) caret.remove();
+  return true;
+}
+
+/* ========================================================================
+   [KODE: DAT-01] PENERAPAN DATA DARI CUS-01 (tidak ada lagi file txt)
+   ======================================================================== */
+let DATA = { giver: 'Aku', name: 'Sayang', age: 0, day: 25, month: 11, birthYear: null, letter: '', prayer: '' };
+function applyKartu() {
+  const K = KARTU, tidy = t => String(t || '').replace(/\r/g, '').replace(/^\uFEFF/, '').trim();
+  DATA.giver = K.NAMA_PEMBERI || DATA.giver;
+  DATA.name  = K.NAMA_PENERIMA || DATA.name;
+  DATA.day   = +K.TGL_LAHIR || DATA.day;
+  DATA.month = (+K.BLN_LAHIR || DATA.month + 1) - 1;
+  DATA.birthYear = +K.THN_LAHIR || null;
+  DATA.age = +K.USIA || (DATA.birthYear ? nextBirthday().getFullYear() - DATA.birthYear : 0);
+  DATA.letter = fill(tidy(K.SURAT_UCAPAN_JUDUL)) + '\n\n' + fill(tidy(K.SURAT_UCAPAN_ISI));
+  DATA.prayer = fill(tidy(K.SURAT_DOA_JUDUL)) + '\n\n' + fill(tidy(K.SURAT_DOA_ISI));
+  document.title = K.JUDUL_TAB || document.title;
+  document.body.classList.toggle('no-kode', K.TAMPILKAN_KODE === false);
+}
+function nextBirthday() {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let d = new Date(now.getFullYear(), DATA.month, DATA.day);
+  if (d < today) d = new Date(now.getFullYear() + 1, DATA.month, DATA.day);
+  return d;
+}
+function getBirthDate() {
+  const by = DATA.birthYear || (nextBirthday().getFullYear() - DATA.age);
+  return new Date(by, DATA.month, DATA.day);
+}
+function ymd(from, to) {
+  let y = to.getFullYear() - from.getFullYear(), m = to.getMonth() - from.getMonth(), d = to.getDate() - from.getDate();
+  if (d < 0) { m--; d += new Date(to.getFullYear(), to.getMonth(), 0).getDate(); }
+  if (m < 0) { y--; m += 12; }
+  return { y, m, d };
+}
+
+/* ========================================================================
+   [KODE: LOAD-10] DOWNLOAD SEMUA DATA DI AWAL (txt, lagu, gambar album)
+   ======================================================================== */
+const store = { songUrl: null, images: [], memo: [], fatal: null, notes: [] };
+const prog = {};
+async function fetchBlob(url, key) {
+  const p = prog[key];
+  const res = await fetch(encodeURI(url));
+  if (!res.ok) throw new Error('HTTP ' + res.status + ' → ' + url);
+  const total = +res.headers.get('Content-Length') || 0;
+  if (!res.body || !res.body.getReader) { const b = await res.blob(); p.v = 1; return b; }
+  const reader = res.body.getReader(), chunks = []; let got = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value); got += value.length;
+    p.v = total ? Math.min(got / total, .995) : 1 - 1 / (1 + got / 250000);
+  }
+  p.v = 1;
+  return new Blob(chunks, { type: res.headers.get('Content-Type') || '' });
+}
+function loadAll() {
+  const tasks = [];
+  applyKartu();
+  if (CFG.SONG_FILE) {
+    prog.song = { v: 0, w: 60 };
+    /* cadangan: kalau fetch gagal (mis. index.html dibuka dengan klik dua kali / file://), coba muat lagu langsung lewat elemen audio */
+    const probe = url => new Promise((ok, no) => {
+      const a = new Audio(), to = setTimeout(() => no(new Error('timeout')), 20000); a.preload = 'auto';
+      a.addEventListener('loadedmetadata', () => { clearTimeout(to); ok(); }, { once: true });
+      a.addEventListener('error', () => { clearTimeout(to); no(new Error('audio error')); }, { once: true });
+      a.src = encodeURI(url);
+    });
+    tasks.push(fetchBlob(CFG.SONG_FILE, 'song').then(b => { store.songUrl = URL.createObjectURL(new Blob([b], { type: 'audio/mpeg' })); })
+      .catch(e => probe(CFG.SONG_FILE).then(() => { store.songUrl = encodeURI(CFG.SONG_FILE); prog.song.v = 1; })
+        .catch(e2 => { prog.song.v = 1; store.notes.push('Lagu "' + CFG.SONG_FILE + '" tidak ditemukan. Pastikan namanya persis sama (huruf kecil, ekstensi .mp3 saja) dan satu folder dengan index.html.'); console.warn(e, e2); })));
+  }
+  CFG.IMAGES.forEach((src, i) => {
+    prog['img' + i] = { v: 0, w: 34 / CFG.IMAGES.length };
+    tasks.push(fetchBlob(src, 'img' + i).then(b => { const u = URL.createObjectURL(b); store.images[i] = u; const im = new Image(); im.src = u; return im.decode().catch(() => {}); })
+      .catch(e => { prog['img' + i].v = 1; console.warn(e); }));
+  });
+  /* foto polaroid: ikut di-download saat loading (cadangan: muat langsung jika fetch diblokir, mis. file://) */
+  const loadImg = url => new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(url); im.onerror = () => no(new Error('gambar gagal dimuat')); im.src = url; });
+  CFG.MEMO.forEach((src, i) => {
+    prog['memo' + i] = { v: 0, w: 30 / CFG.MEMO.length };
+    tasks.push(fetchBlob(src, 'memo' + i).then(b => loadImg(URL.createObjectURL(b))).then(u => { store.memo[i] = u; })
+      .catch(() => loadImg(encodeURI(src)).then(u => { store.memo[i] = u; })
+        .catch(e2 => { store.memo[i] = null; console.warn('Foto tidak ditemukan: ' + src, e2); if (KARTU.TAMPILKAN_KODE !== false) store.notes.push('Foto "' + src + '" tidak ditemukan (diganti kotak sementara).'); }))
+      .then(() => { prog['memo' + i].v = 1; }));
+  });
+  return Promise.all(tasks);
+}
+function totalProgress() {
+  let s = 0, w = 0; for (const k in prog) { s += prog[k].v * prog[k].w; w += prog[k].w; } return w ? s / w : 1;
+}
+
+/* ========================================================================
+   [KODE: GLX-00] SCENE 3D
+   ======================================================================== */
+const canvas = $('#gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+const PR = Math.min(window.devicePixelRatio || 1, IS_MOBILE ? 1.5 : 2);
+renderer.setPixelRatio(PR);
+renderer.setSize(innerWidth, innerHeight);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x01020a);
+const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 40000);
+camera.position.set(0, 260, 4200); camera.lookAt(0, 0, 0);
+scene.add(camera);
+const U = { uTime: { value: 0 }, uPR: { value: PR }, uScale: { value: innerHeight / (2 * Math.tan(THREE.MathUtils.degToRad(30))) } };
+const GA = { value: 0 }; // alpha galaksi
+
+/* [KODE: CTL-01] kontrol 3D: geser, putar, zoom */
+const controls = new THREE.OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.06;
+controls.rotateSpeed = 0.6; controls.zoomSpeed = 0.9; controls.panSpeed = 0.7;
+controls.minDistance = 14; controls.maxDistance = 900;
+controls.enabled = false;
+
+const VS = `
+attribute vec3 aColor; attribute float aSize; attribute float aPhase; attribute float aAlpha;
+uniform float uTime,uPR,uScale,uTw,uAtten;
+varying vec3 vC; varying float vA;
+void main(){
+  vec4 mv=modelViewMatrix*vec4(position,1.0);
+  gl_Position=projectionMatrix*mv;
+  float tw=mix(1.0,0.62+0.38*sin(uTime*(0.8+aPhase*2.2)+aPhase*60.0),uTw);
+  float s=mix(aSize*uPR,aSize*uPR*uScale/max(-mv.z,0.1),uAtten);
+  float m=1.4*uPR;
+  gl_PointSize=clamp(max(s,m),0.0,80.0*uPR);
+  vC=aColor; vA=aAlpha*tw*clamp(s/m,0.35,1.0);
+}`;
+const FS = `
+uniform float uAlpha,uFall; varying vec3 vC; varying float vA;
+void main(){ float d=length(gl_PointCoord-0.5)*2.0; if(d>1.0) discard;
+  float a=pow(1.0-d,uFall); gl_FragColor=vec4(vC,a*vA*uAlpha); }`;
+function pointMat(o = {}) {
+  return new THREE.ShaderMaterial({
+    uniforms: { uTime: U.uTime, uPR: U.uPR, uScale: U.uScale, uAlpha: o.alpha || { value: 1 }, uFall: { value: o.fall || 2.2 },
+      uTw: { value: o.tw === undefined ? 1 : o.tw }, uAtten: { value: o.atten === false ? 0 : 1 } },
+    vertexShader: VS, fragmentShader: FS, transparent: true, depthWrite: false,
+    blending: o.normal ? THREE.NormalBlending : THREE.AdditiveBlending
+  });
+}
+function mkGeo(n) { return { pos: new Float32Array(n * 3), col: new Float32Array(n * 3), size: new Float32Array(n), ph: new Float32Array(n), al: new Float32Array(n).fill(1), n }; }
+function toPoints(g, mat) {
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(g.pos, 3));
+  geo.setAttribute('aColor', new THREE.BufferAttribute(g.col, 3));
+  geo.setAttribute('aSize', new THREE.BufferAttribute(g.size, 1));
+  geo.setAttribute('aPhase', new THREE.BufferAttribute(g.ph, 1));
+  geo.setAttribute('aAlpha', new THREE.BufferAttribute(g.al, 1));
+  const p = new THREE.Points(geo, mat); p.frustumCulled = false; return p;
+}
+function radialTex(stops, size = 256) {
+  const c = document.createElement('canvas'); c.width = c.height = size; const x = c.getContext('2d');
+  const g = x.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  stops.forEach(s => g.addColorStop(s[0], s[1])); x.fillStyle = g; x.fillRect(0, 0, size, size);
+  return new THREE.CanvasTexture(c);
+}
+function setCol(g, i, r, gg, b, k) { g.col[i * 3] = r * k; g.col[i * 3 + 1] = gg * k; g.col[i * 3 + 2] = b * k; }
+
+/* ---------- [KODE: GLX-01] bintang latar + Bima Sakti ---------- */
+const bg = new THREE.Group(); scene.add(bg);
+(function buildBackground() {
+  const n = Q.bgStars + Q.bgBand, g = mkGeo(n), R = 9000;
+  const palette = [[1, 1, 1], [.7, .82, 1], [1, .92, .75], [1, .72, .55], [.8, .75, 1]];
+  for (let i = 0; i < n; i++) {
+    let x, y, z;
+    if (i < Q.bgStars) { x = gauss(); y = gauss(); z = gauss(); }
+    else { x = gauss(); y = gauss() * 0.11; z = gauss(); }
+    const l = Math.hypot(x, y, z) || 1;
+    let px = x / l * R, py = y / l * R, pz = z / l * R;
+    if (i >= Q.bgStars) { // miringkan pita Bima Sakti
+      const a = 0.55, b = 0.35;
+      let y1 = py * Math.cos(a) - pz * Math.sin(a), z1 = py * Math.sin(a) + pz * Math.cos(a); py = y1; pz = z1;
+      let x1 = px * Math.cos(b) - py * Math.sin(b), y2 = px * Math.sin(b) + py * Math.cos(b); px = x1; py = y2;
+    }
+    g.pos.set([px, py, pz], i * 3);
+    const c = palette[(Math.random() * palette.length) | 0], inBand = i >= Q.bgStars;
+    setCol(g, i, c[0], c[1], c[2], (inBand ? .35 : .5) + Math.random() * .5);
+    g.size[i] = inBand ? 0.9 + Math.random() * 1.6 : 1 + Math.pow(Math.random(), 4) * 3.2;
+    g.ph[i] = Math.random(); g.al[i] = inBand ? .55 : 1;
+  }
+  bg.add(toPoints(g, pointMat({ atten: false, fall: 1.6 })));
+  /* [KODE: GLX-02] nebula latar */
+  const cols = ['150,80,255', '255,90,170', '70,130,255', '40,200,255', '255,140,90', '170,90,255', '90,160,255'];
+  cols.forEach((col, i) => {
+    const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d');
+    for (let k = 0; k < 34; k++) {
+      const bx = 128 + gauss() * 40, by = 128 + gauss() * 40, br = 22 + Math.random() * 60;
+      const rg = x.createRadialGradient(bx, by, 0, bx, by, br); rg.addColorStop(0, `rgba(${col},.16)`); rg.addColorStop(1, `rgba(${col},0)`);
+      x.fillStyle = rg; x.fillRect(0, 0, 256, 256);
+    }
+    /* gradasi yang terpotong tepi kanvas membentuk kotak samar; tepi dipudarkan agar nebula menyatu mulus dengan ruang angkasa */
+    x.globalCompositeOperation = 'destination-in';
+    const mk = x.createRadialGradient(128, 128, 0, 128, 128, 128);
+    mk.addColorStop(0, 'rgba(0,0,0,1)'); mk.addColorStop(.5, 'rgba(0,0,0,.8)'); mk.addColorStop(1, 'rgba(0,0,0,0)');
+    x.fillStyle = mk; x.fillRect(0, 0, 256, 256); x.globalCompositeOperation = 'source-over';
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: .55 }));
+    const a = Math.random() * Math.PI * 2, e = rand(-.6, .6);
+    sp.position.set(Math.cos(a) * Math.cos(e) * 8200, Math.sin(e) * 8200, Math.sin(a) * Math.cos(e) * 8200);
+    const s = rand(4500, 8000); sp.scale.set(s, s, 1); bg.add(sp);
+  });
+})();
+
+/* ---------- [KODE: GLX-03] galaksi spiral realistis ---------- */
+const galaxyTilt = new THREE.Group(), galaxySpin = new THREE.Group();
+galaxyTilt.rotation.set(0, 0, 0);   /* [4B] cakram galaksi mendatar, hati berdiri tegak di tengahnya */
+ galaxyTilt.add(galaxySpin); scene.add(galaxyTilt); galaxyTilt.visible = false;
+let coreGlow, coreGlow2, holeRing;
+(function buildGalaxy() {
+  const R = 85, ARMS = 4, SPIN = 0.052;
+  const armPos = r => {
+    const arm = (Math.random() * ARMS) | 0;
+    let a = arm / ARMS * Math.PI * 2 + r * SPIN, sg = 1.1 + 0.075 * r;
+    if (Math.random() < .26) a = Math.random() * Math.PI * 2, sg = 2.2 + 0.05 * r; // bintang antar-lengan
+    return [Math.cos(a) * r + gauss() * sg, Math.sin(a) * r + gauss() * sg, a];
+  };
+  const radius = () => { let r; do { r = -Math.log(1 - Math.random() * .985) * R * .27; } while (r > R); return r; };
+  /* cakram */
+  let g = mkGeo(Q.disc);
+  for (let i = 0; i < g.n; i++) {
+    const r = radius(), p = armPos(r), t = r / R, inArm = true;
+    const y = gauss() * (0.9 * Math.exp(-r / (R * .42)) + 0.22);
+    g.pos.set([p[0], y, p[1]], i * 3);
+    let cr = 1, cg = .8, cb = .55; // inti hangat
+    const m = smooth(.05, .5, t); cr = cr * (1 - m) + .62 * m; cg = cg * (1 - m) + .76 * m; cb = cb * (1 - m) + 1 * m;
+    const o = smooth(.55, 1, t); cr = cr * (1 - o) + .48 * o; cg = cg * (1 - o) + .5 * o; cb = cb * (1 - o) + .95 * o;
+    const q = Math.random();
+    if (q < .045) { cr = 1; cg = .42; cb = .62; }          // wilayah pembentukan bintang (merah muda)
+    else if (q < .1) { cr = .75; cg = .88; cb = 1; }       // bintang biru raksasa
+    setCol(g, i, cr, cg, cb, .3 + Math.pow(Math.random(), 1.7) * .8);
+    g.size[i] = .22 + Math.pow(Math.random(), 4) * .95 + (q < .1 ? .25 : 0);
+    g.ph[i] = Math.random();
+  }
+  galaxySpin.add(toPoints(g, pointMat({ alpha: GA })));
+  /* bulge */
+  g = mkGeo(Q.bulge);
+  for (let i = 0; i < g.n; i++) {
+    const x = gauss() * 7.5, y = gauss() * 2.2, z = gauss() * 7.5, d = Math.hypot(x, y * 1.6, z);
+    g.pos.set([x, y, z], i * 3);
+    const k = clamp(1.15 - d / 22, .25, 1);
+    setCol(g, i, 1, .84 + k * .12, .62 + k * .3, (.35 + Math.random() * .6) * (.6 + k * .6));
+    g.size[i] = .25 + Math.pow(Math.random(), 3) * .7; g.ph[i] = Math.random();
+  }
+  galaxySpin.add(toPoints(g, pointMat({ alpha: GA })));
+  /* halo */
+  g = mkGeo(Q.halo);
+  for (let i = 0; i < g.n; i++) {
+    g.pos.set([gauss() * 52, gauss() * 7, gauss() * 52], i * 3);
+    setCol(g, i, 1, .7, .55, .22 + Math.random() * .4); g.size[i] = .3 + Math.pow(Math.random(), 3) * .6; g.ph[i] = Math.random();
+  }
+  galaxySpin.add(toPoints(g, pointMat({ alpha: GA })));
+  /* kabut halus (haze) mengikuti lengan */
+  g = mkGeo(Q.haze);
+  for (let i = 0; i < g.n; i++) {
+    const r = radius() * 1.05, p = armPos(Math.min(r, R)), t = r / R;
+    g.pos.set([p[0], gauss() * .8, p[1]], i * 3);
+    const warm = 1 - smooth(0, .45, t);
+    setCol(g, i, .42 + warm * .5, .4 + warm * .25, .95 - warm * .25, 1);
+    g.size[i] = 5 + Math.random() * 7; g.al[i] = .035 + Math.random() * .03; g.ph[i] = Math.random();
+  }
+  galaxySpin.add(toPoints(g, pointMat({ alpha: GA, fall: 1.2, tw: 0 })));
+  /* jalur debu gelap */
+  g = mkGeo(Q.dust);
+  for (let i = 0; i < g.n; i++) {
+    const r = 6 + radius() * 1.1, p = armPos(Math.min(r, R)), a = p[2] - .13;
+    const rr = Math.min(r, R);
+    g.pos.set([Math.cos(a) * rr + gauss() * 1.0, gauss() * .5, Math.sin(a) * rr + gauss() * 1.0], i * 3);
+    setCol(g, i, .02, .008, .03, 1); g.size[i] = 3 + Math.random() * 4.5; g.al[i] = .09 + Math.random() * .08; g.ph[i] = Math.random();
+  }
+  const dust = toPoints(g, pointMat({ alpha: GA, normal: true, fall: 1.0, tw: 0 })); dust.renderOrder = 3; galaxySpin.add(dust);
+  /* [KODE: GLX-04] inti bercahaya */
+  const mk = (tex, s, op) => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0 })); sp.scale.set(s, s, 1); sp.userData.op = op; scene.add(sp); sp.visible = false; return sp; };
+  coreGlow = mk(radialTex([[0, 'rgba(255,240,205,1)'], [.18, 'rgba(255,200,130,.55)'], [.5, 'rgba(255,150,120,.14)'], [1, 'rgba(255,120,150,0)']]), 24, .5);
+  coreGlow2 = mk(radialTex([[0, 'rgba(160,130,255,.4)'], [.5, 'rgba(120,100,255,.1)'], [1, 'rgba(100,90,255,0)']]), 110, .32);
+  /* [KODE: GLX-05] lubang kecil tempat asap bintang keluar (cincin bercahaya + tengah gelap) */
+  const rc = document.createElement('canvas'); rc.width = rc.height = 256; const rx = rc.getContext('2d');
+  const rg = rx.createRadialGradient(128, 128, 0, 128, 128, 128);
+  [[0, 'rgba(3,0,10,1)'], [.3, 'rgba(3,0,10,1)'], [.37, 'rgba(255,190,230,.95)'], [.45, 'rgba(255,120,190,.6)'], [.7, 'rgba(210,90,200,.13)'], [1, 'rgba(210,90,200,0)']].forEach(t => rg.addColorStop(t[0], t[1]));
+  rx.fillStyle = rg; rx.fillRect(0, 0, 256, 256);
+  holeRing = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(rc), transparent: true, depthWrite: false, opacity: 0 }));
+  holeRing.rotation.x = -Math.PI / 2; holeRing.scale.set(13, 13, 1); holeRing.position.y = .2; holeRing.renderOrder = 4; holeRing.visible = false; scene.add(holeRing);
+})();
+
+/* ---------- [KODE: WRP-10] garis bintang saat warp ---------- */
+const STR_N = 1500, strPos = new Float32Array(STR_N * 6), strCol = new Float32Array(STR_N * 6), strS = [];
+for (let i = 0; i < STR_N; i++) {
+  const a = Math.random() * Math.PI * 2, r = 12 + Math.sqrt(Math.random()) * 950;
+  strS.push({ x: Math.cos(a) * r, y: Math.sin(a) * r, z: -rand(10, 2800), k: .5 + Math.random() * .5, h: Math.random() });
+  const bl = strS[i].h < .6, c = bl ? [.7, .85, 1] : [1, .8, .95];
+  strCol.set([c[0], c[1], c[2], 0, 0, 0], i * 6);
+}
+const strGeo = new THREE.BufferGeometry();
+strGeo.setAttribute('position', new THREE.BufferAttribute(strPos, 3));
+strGeo.setAttribute('color', new THREE.BufferAttribute(strCol, 3));
+const strMat = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+const streaks = new THREE.LineSegments(strGeo, strMat); streaks.frustumCulled = false; streaks.renderOrder = 20; camera.add(streaks);
+function updateStreaks(v, dt, intensity) {
+  strMat.opacity = intensity; if (intensity <= 0.002) return;
+  const len = clamp(v * 0.12, 3, 380);
+  for (let i = 0; i < STR_N; i++) {
+    const s = strS[i]; s.z += v * dt * s.k;
+    if (s.z > -4) { s.z = -rand(1500, 2800); }
+    strPos[i * 6] = s.x; strPos[i * 6 + 1] = s.y; strPos[i * 6 + 2] = s.z;
+    strPos[i * 6 + 3] = s.x; strPos[i * 6 + 4] = s.y; strPos[i * 6 + 5] = s.z - len * s.k;
+  }
+  strGeo.attributes.position.needsUpdate = true;
+}
+
+/* ---------- [KODE: HRT-01 = 4D] asap bintang dari 1 lubang kecil membentuk hati yang BERDIRI TEGAK ---------- */
+/* ---------- [KODE: HRT-02 = 4E] tulisan LOVE di tengah hati ---------- */
+let heartMat, heartPts, heartGlow, heartHit, heartT0 = null;
+const HEART_BASE_Y = 4;   // tinggi ujung bawah hati di atas lubang
+(function buildHeart() {
+  const W = 440, H = 400, ppu = 12, cx = 220, cy = 170, K = 1.9, YOFF = HEART_BASE_Y + 17 * K, TY = cy + 14;
+  const FONT = 'bold 72px Georgia,"Times New Roman",serif';
+  const mkc = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; };
+  const hpt = (t, s) => { const x = 16 * Math.pow(Math.sin(t), 3), y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t); return [cx + x * ppu * s, cy - y * ppu * s]; };
+  const cA = mkc(), xA = cA.getContext('2d', { willReadFrequently: true });
+  xA.fillStyle = '#fff'; xA.beginPath(); for (let t = 0; t <= Math.PI * 2 + .02; t += .02) { const p = hpt(t, 1); t === 0 ? xA.moveTo(p[0], p[1]) : xA.lineTo(p[0], p[1]); } xA.closePath(); xA.fill();
+  const LOVE = KARTU.TEKS_HATI || 'LOVE';
+  const FONT2 = (() => { const m = mkc().getContext('2d'); m.font = FONT; const w = m.measureText(LOVE).width; return w > 250 ? 'bold ' + Math.max(28, Math.floor(72 * 250 / w)) + 'px Georgia,"Times New Roman",serif' : FONT; })();   // huruf mengecil otomatis jika teks panjang
+  const setT = x => { x.font = FONT2; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#fff'; x.strokeStyle = '#fff'; x.lineJoin = 'round'; };
+  const cB = mkc(), xB = cB.getContext('2d', { willReadFrequently: true }); setT(xB); xB.lineWidth = 18; xB.strokeText(LOVE, cx, TY); xB.fillText(LOVE, cx, TY);
+  const cC = mkc(), xC = cC.getContext('2d', { willReadFrequently: true }); setT(xC); xC.fillText(LOVE, cx, TY);
+  const dA = xA.getImageData(0, 0, W, H).data, dB = xB.getImageData(0, 0, W, H).data, dC = xC.getImageData(0, 0, W, H).data;
+  const fillC = [], textC = [];
+  for (let y = 0; y < H; y += 2) for (let x = 0; x < W; x += 2) {
+    const i = (y * W + x) * 4 + 3;
+    if (dC[i] > 128) textC.push([x, y]);
+    else if (dA[i] > 128 && dB[i] < 10) fillC.push([x, y]);
+  }
+  const total = Q.hOut + Q.hIn + Q.hFill + Q.hText + Q.hSmoke;
+  const aStart = new Float32Array(total * 3), aTarget = new Float32Array(total * 3), aRand = new Float32Array(total * 3);
+  const aDelay = new Float32Array(total), aDur = new Float32Array(total), aSize = new Float32Array(total), aColor = new Float32Array(total * 3), aPhase = new Float32Array(total), aLoop = new Float32Array(total);
+  const w = (px, py) => [(px - cx) / ppu * K, -(py - cy) / ppu * K + YOFF];
+  let i = 0;
+  const add = (px, py, z, kind) => {
+    const t = w(px, py);
+    aTarget.set([t[0], t[1], z], i * 3);
+    aStart.set([gauss() * .35, .5 + Math.abs(gauss()) * .5, gauss() * .35], i * 3);   // semua berawal dari lubang kecil yang sama
+    const d = Math.random() * Math.PI * 2, e = Math.acos(rand(-1, 1)), m = rand(14, 62);
+    aRand.set([Math.sin(e) * Math.cos(d) * m, Math.sin(e) * Math.sin(d) * m, Math.cos(e) * m * .8], i * 3);   // hanya panjangnya dipakai untuk meliuk
+    let c, sz, dl;
+    if (kind === 0) { const k = Math.random(); c = [1, .32 + k * .45, .55 + k * .35]; sz = rand(.85, 1.5); dl = rand(0, 5); }
+    else if (kind === 1) { c = [1, .45, .7]; sz = rand(.7, 1.2); dl = rand(.5, 5.5); }
+    else if (kind === 2) { const k = Math.random(); c = k < .55 ? [1, .4, .66] : k < .85 ? [.92, .32, .8] : [.72, .5, 1]; sz = rand(.55, 1.1); dl = rand(1, 6.5); }
+    else { c = [1, .97, .92]; sz = rand(1.0, 1.7); dl = rand(3.5, 7); }
+    const b = rand(.6, 1); aColor.set([c[0] * b, c[1] * b, c[2] * b], i * 3);
+    aSize[i] = sz; aDelay[i] = dl; aDur[i] = rand(3.4, 5.2); aPhase[i] = Math.random(); i++;
+  };
+  for (let k = 0; k < Q.hOut; k++) { const p = hpt(Math.random() * Math.PI * 2, 1); add(p[0] + gauss() * .7, p[1] + gauss() * .7, gauss() * .7, 0); }
+  for (let k = 0; k < Q.hIn; k++) { const p = hpt(Math.random() * Math.PI * 2, .88); add(p[0] + gauss() * 1.4, p[1] + gauss() * 1.4, gauss() * 1, 1); }
+  for (let k = 0; k < Q.hFill; k++) { const p = fillC[(Math.random() * fillC.length) | 0]; add(p[0] + Math.random() * 2, p[1] + Math.random() * 2, gauss() * 1.4, 2); }
+  for (let k = 0; k < Q.hText; k++) { const p = textC[(Math.random() * textC.length) | 0]; add(p[0] + Math.random() * 2, p[1] + Math.random() * 2, gauss() * .35, 3); }
+  /* asap yang terus mengepul dari lubang ke arah hati (berulang selamanya) */
+  for (let k = 0; k < Q.hSmoke; k++) {
+    aTarget.set([gauss() * 2.4, rand(4, 36), gauss() * 2.4], i * 3);
+    aStart.set([gauss() * .3, .5, gauss() * .3], i * 3);
+    aRand.set([rand(8, 26), 0, 0], i * 3);
+    const b = rand(.45, .85), q = Math.random(); aColor.set([b, (.6 + q * .25) * b, (.85 + q * .12) * b], i * 3);
+    aSize[i] = rand(1.1, 2.2); aDelay[i] = rand(3.5, 12); aDur[i] = rand(4, 7); aPhase[i] = Math.random(); aLoop[i] = 1; i++;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(total * 3), 3));
+  [['aStart', aStart, 3], ['aTarget', aTarget, 3], ['aRand', aRand, 3], ['aDelay', aDelay, 1], ['aDur', aDur, 1], ['aSize', aSize, 1], ['aColor', aColor, 3], ['aPhase', aPhase, 1], ['aLoop', aLoop, 1]]
+    .forEach(a => geo.setAttribute(a[0], new THREE.BufferAttribute(a[1], a[2])));
+  heartMat = new THREE.ShaderMaterial({
+    uniforms: { uT: { value: -100 }, uTime: U.uTime, uPR: U.uPR, uScale: U.uScale, uBeat: { value: 1 } },
+    vertexShader: `
+      attribute vec3 aStart,aTarget,aRand,aColor; attribute float aDelay,aDur,aSize,aPhase,aLoop;
+      uniform float uT,uTime,uPR,uScale,uBeat; varying vec3 vC; varying float vA;
+      void main(){
+        float raw=(uT-aDelay)/aDur;
+        float lp=step(0.5,aLoop);
+        float p=mix(clamp(raw,0.0,1.0),fract(max(raw,0.0)),lp);
+        float s=p*p*(3.0-2.0*p);
+        /* lintasan asap: naik dulu lewat kolom di atas lubang, lalu melebar ke tujuan */
+        vec3 P1=vec3(aTarget.x*0.10,aTarget.y*0.55+6.0,aTarget.z*0.10);
+        float is=1.0-s;
+        vec3 pos=is*is*aStart+2.0*is*s*P1+s*s*aTarget;
+        float ang=uTime*0.9+aPhase*6.2831;
+        float wob=sin(p*3.14159)*(1.0-0.55*s)*length(aRand)*0.12;
+        pos+=vec3(cos(ang),0.35*sin(ang*1.3),sin(ang))*wob;
+        float f=step(1.0,p)*(1.0-lp);
+        pos+=f*0.22*vec3(sin(uTime*0.7+aPhase*6.0),cos(uTime*0.6+aPhase*9.0),sin(uTime*0.5+aPhase*3.0));
+        pos*=mix(1.0,uBeat,f);
+        vec4 mv=modelViewMatrix*vec4(pos,1.0); gl_Position=projectionMatrix*mv;
+        float tw=0.68+0.32*sin(uTime*(1.4+aPhase*2.0)+aPhase*50.0);
+        float sz=aSize*mix(1.8,1.0,s)*uPR*uScale/max(-mv.z,0.1);
+        gl_PointSize=clamp(max(sz,1.6*uPR),0.0,60.0*uPR);
+        float alive=step(0.0,raw);
+        vC=aColor;
+        vA=mix(smoothstep(0.0,0.07,p)*tw*mix(0.35,1.0,s),sin(p*3.14159)*0.5*tw,lp)*alive;
+      }`,
+    fragmentShader: FS.replace('uniform float uAlpha,uFall;', 'uniform float uAlpha,uFall;'),
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+  });
+  heartMat.uniforms.uAlpha = { value: 1 }; heartMat.uniforms.uFall = { value: 2.0 };
+  heartPts = new THREE.Points(geo, heartMat); heartPts.frustumCulled = false; heartPts.renderOrder = 8; scene.add(heartPts);
+  /* [KODE: 4I] area ketuk tak terlihat tepat di tulisan tengah hati (ikut bergoyang bersama hati) */
+  const mw = (() => { const m = mkc().getContext('2d'); m.font = FONT2; return m.measureText(LOVE).width; })();
+  heartHit = new THREE.Mesh(new THREE.PlaneGeometry((mw + 60) / ppu * K, 130 / ppu * K), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }));
+  heartHit.position.set(0, -(TY - cy) / ppu * K + YOFF, 0); heartPts.add(heartHit);
+  heartGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: radialTex([[0, 'rgba(255,110,180,.55)'], [.5, 'rgba(210,90,200,.16)'], [1, 'rgba(180,80,220,0)']]), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0 }));
+  heartGlow.scale.set(90, 90, 1); heartGlow.position.set(0, HEART_BASE_Y + 28, -3); heartGlow.renderOrder = 7; scene.add(heartGlow);
+})();
+
+/* ========================================================================
+   [KODE: ICN-01] EMOJI LUCU 3D (klik & hover)
+   ======================================================================== */
+const iconGroup = new THREE.Group(), decorGroup = new THREE.Group(); scene.add(iconGroup, decorGroup);
+const clickables = [], decor = [];
+const emojiTexCache = {};
+function emojiTex(e) {
+  if (emojiTexCache[e]) return emojiTexCache[e];
+  const c = document.createElement('canvas'); c.width = c.height = 160; const x = c.getContext('2d');
+  x.font = '116px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(e, 80, 88);
+  const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return (emojiTexCache[e] = t);
+}
+/* [KODE: ICN-01 = 5A-5E] stiker lucu ala kucing/hewan imut, digambar langsung (tanpa file gambar) */
+function kawaiiTex(a) {
+  const key = JSON.stringify(a); if (emojiTexCache[key]) return emojiTexCache[key];
+  const S = 256, c = document.createElement('canvas'); c.width = c.height = S; const x = c.getContext('2d');
+  const L = '#5a3550', fur = a.fur || '#ffffff', pink = '#ffb3cc', TAU = Math.PI * 2;
+  x.lineJoin = 'round'; x.lineCap = 'round';
+  const ell = (cx, cy, rx, ry, fill, lw, rot) => { x.beginPath(); x.ellipse(cx, cy, rx, ry, rot || 0, 0, TAU); if (fill) { x.fillStyle = fill; x.fill(); } if (lw !== 0) { x.lineWidth = lw || 5; x.strokeStyle = L; x.stroke(); } };
+  const poly = (pts, fill, lw) => { x.beginPath(); pts.forEach((q, i) => i ? x.lineTo(q[0], q[1]) : x.moveTo(q[0], q[1])); x.closePath(); if (fill) { x.fillStyle = fill; x.fill(); } if (lw !== 0) { x.lineWidth = lw || 5; x.strokeStyle = L; x.stroke(); } };
+  const heart = (cx, cy, r, fill, lw) => { x.beginPath(); x.moveTo(cx, cy + r * .9); x.bezierCurveTo(cx - r * 1.5, cy - r * .1, cx - r * .8, cy - r * 1.2, cx, cy - r * .45); x.bezierCurveTo(cx + r * .8, cy - r * 1.2, cx + r * 1.5, cy - r * .1, cx, cy + r * .9); x.closePath(); if (fill) { x.fillStyle = fill; x.fill(); } if (lw) { x.lineWidth = lw; x.strokeStyle = L; x.stroke(); } };
+  const sparkle = (cx, cy, r, fill) => { x.beginPath(); for (let i = 0; i < 8; i++) { const an = i * Math.PI / 4, rr = i % 2 ? r * .32 : r; x.lineTo(cx + Math.cos(an) * rr, cy + Math.sin(an) * rr); } x.closePath(); x.fillStyle = fill; x.fill(); };
+  const face = (ey, gap) => {
+    [-1, 1].forEach(sg => {
+      ell(128 + sg * gap, ey, 8, 10.5, '#2a1730', 0);
+      x.fillStyle = '#fff'; x.beginPath(); x.arc(128 + sg * gap + 2.5, ey - 4, 3.2, 0, TAU); x.fill();
+      x.beginPath(); x.arc(128 + sg * gap - 2, ey + 3.5, 1.6, 0, TAU); x.fill();
+      ell(128 + sg * (gap + 22), ey + 17, 13, 8, 'rgba(255,120,160,.55)', 0);
+    });
+    ell(128, ey + 12, 4.5, 3.2, '#ff8fb0', 0);
+    x.strokeStyle = L; x.lineWidth = 4; x.beginPath(); x.arc(121, ey + 16, 6.5, .1, Math.PI * .9); x.stroke(); x.beginPath(); x.arc(135, ey + 16, 6.5, Math.PI * .1, Math.PI * .9); x.stroke();
+  };
+  const k = a.kind;
+  if (k === 'heart') {
+    x.save(); x.shadowColor = 'rgba(255,80,150,.9)'; x.shadowBlur = 30;
+    const g = x.createRadialGradient(100, 92, 6, 128, 122, 105); g.addColorStop(0, '#ffc7de'); g.addColorStop(.45, '#ff5c9e'); g.addColorStop(1, '#d9226f');
+    heart(128, 122, 70, g, 0); x.restore(); ell(94, 88, 17, 9, 'rgba(255,255,255,.55)', 0, -.6);
+  } else if (k === 'star') {
+    const pts = []; for (let i = 0; i < 10; i++) { const an = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? 42 : 92; pts.push([128 + Math.cos(an) * rr, 132 + Math.sin(an) * rr]); }
+    poly(pts, '#ffe27a'); face(128, 22);
+  } else if (k === 'cloud') {
+    const parts = [[88, 152, 40, 32], [128, 126, 52, 46], [170, 152, 40, 32], [128, 164, 72, 26]];
+    parts.forEach(q => ell(q[0], q[1], q[2], q[3], null, 13));
+    parts.forEach(q => ell(q[0], q[1], q[2], q[3], '#fff', 0));
+    face(142, 28);
+  } else if (k === 'planet') {
+    x.lineWidth = 11; x.strokeStyle = '#ffd1e6'; x.beginPath(); x.ellipse(128, 136, 112, 30, -.35, 0, TAU); x.stroke();
+    ell(128, 128, 70, 70, '#c2a8ff'); x.lineWidth = 11; x.strokeStyle = '#ffd1e6'; x.beginPath(); x.ellipse(128, 136, 112, 30, -.35, .2, Math.PI - .2); x.stroke();
+    face(112, 26);
+  } else {
+    if (k === 'cat') [-1, 1].forEach(sg => { const X = v => 128 + sg * (v - 128); poly([[X(66), 96], [X(58), 30], [X(112), 66]], fur); poly([[X(76), 84], [X(72), 50], [X(98), 68]], pink, 0); });
+    else if (k === 'bear' || k === 'panda') [-1, 1].forEach(sg => { ell(128 + sg * 58, 70, 25, 25, k === 'panda' ? '#2b2330' : fur); if (k === 'bear') ell(128 + sg * 58, 70, 12, 12, pink, 0); });
+    else if (k === 'bunny') [-1, 1].forEach(sg => { ell(128 + sg * 28, 50, 18, 46, fur, 5, sg * .18); ell(128 + sg * 28, 54, 9, 32, pink, 0, sg * .18); });
+    ell(128, 196, 56, 44, fur);
+    ell(128, 128, 78, 60, fur);
+    if (k === 'panda') [-1, 1].forEach(sg => ell(128 + sg * 34, 128, 17, 22, '#2b2330', 0, sg * .35));
+    if (k === 'chick') { poly([[118, 72], [124, 50], [131, 72]], fur); }
+    face(128, 34);
+    if (k === 'cat') { x.strokeStyle = L; x.lineWidth = 3; [-1, 1].forEach(sg => { [[-4, -6], [4, 0], [12, 6]].forEach(o => { x.beginPath(); x.moveTo(128 + sg * 52, 140 + o[0] * .6); x.lineTo(128 + sg * 80, 140 + o[1]); x.stroke(); }); }); }
+    if (k === 'chick') poly([[120, 139], [136, 139], [128, 150]], '#ff9f4a', 3);
+    const pr = a.prop;
+    if (pr === 'clock') { ell(128, 206, 28, 28, '#fff'); x.lineWidth = 4; x.strokeStyle = L; x.beginPath(); x.moveTo(128, 206); x.lineTo(128, 189); x.moveTo(128, 206); x.lineTo(141, 212); x.stroke(); ell(128, 176, 7, 4, '#ff7aa8', 3); }
+    else if (pr === 'mail') { x.beginPath(); x.rect(98, 190, 60, 40); x.fillStyle = '#fff7fb'; x.fill(); x.lineWidth = 5; x.strokeStyle = L; x.stroke(); x.beginPath(); x.moveTo(98, 190); x.lineTo(128, 214); x.lineTo(158, 190); x.stroke(); heart(128, 215, 7, '#ff6f9f', 0); }
+    else if (pr === 'cake') { x.beginPath(); x.rect(96, 208, 64, 32); x.fillStyle = '#ffd9e8'; x.fill(); x.lineWidth = 5; x.strokeStyle = L; x.stroke(); x.fillStyle = '#fff'; x.fillRect(98, 210, 60, 9); x.beginPath(); x.rect(125, 182, 7, 26); x.fillStyle = '#8fdcff'; x.fill(); x.lineWidth = 3; x.stroke(); ell(128.5, 175, 5, 8, '#ffb64a', 3); }
+    if (pr === 'pray') {
+      ell(119, 208, 11, 15, fur, 5, .25); ell(137, 208, 11, 15, fur, 5, -.25);
+      sparkle(46, 108, 17, '#ffe27a'); sparkle(210, 98, 13, '#ffe27a'); sparkle(214, 178, 10, '#fff3a8'); sparkle(42, 176, 9, '#fff3a8'); heart(204, 52, 9, '#ff7aa8', 0);
+    } else { ell(98, 220, 14, 11, fur); ell(158, 220, 14, 11, fur); }
+  }
+  const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return (emojiTexCache[key] = t);
+}
+const haloTex = radialTex([[0, 'rgba(255,170,225,.6)'], [.45, 'rgba(190,140,255,.2)'], [1, 'rgba(150,120,255,0)']], 128);
+const PORTRAIT = innerWidth / innerHeight < 0.8;
+const ICONS = [
+  { id: 'ICN-CD', code: '5A', art: { kind: 'cat', fur: '#ffffff', prop: 'clock' }, label: KARTU.LABEL_EMOJI_HITUNG_MUNDUR, pos: [-50, 44, 14], size: 15, type: 'countdown' },
+  { id: 'ICN-SR', code: '5B', art: { kind: 'cat', fur: '#cfc4c0', prop: 'mail' }, label: KARTU.LABEL_EMOJI_SURAT, pos: [50, 46, 12], size: 15, type: 'letter' },
+  { id: 'ICN-DO', code: '5C', art: { kind: 'bunny', fur: '#ffffff', prop: 'pray' }, label: KARTU.LABEL_EMOJI_DOA, pos: [-42, 10, 30], size: 15, type: 'prayer' },
+  { id: 'ICN-AG', code: '5D', art: { kind: 'bear', fur: '#e9c7a5', prop: 'cake' }, label: KARTU.LABEL_EMOJI_UMUR, pos: [44, 8, 28], size: 15, type: 'age' }
+].filter(d => KARTU['AKTIF_' + ({ countdown: 'HITUNG_MUNDUR', letter: 'SURAT', prayer: 'DOA', age: 'UMUR' })[d.type]] !== false);
+function makeIcon(emoji, size, pos, halo) {
+  const mat = new THREE.SpriteMaterial({ map: typeof emoji === 'string' ? emojiTex(emoji) : kawaiiTex(emoji), transparent: true, depthWrite: false, opacity: 0 });
+  const sp = new THREE.Sprite(mat); sp.scale.set(0.01, 0.01, 1); sp.position.set(pos[0], pos[1], pos[2]); sp.renderOrder = 6;
+  let h = null;
+  if (halo) { h = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0 })); h.position.copy(sp.position); h.renderOrder = 5; iconGroup.add(h); }
+  return { sp, halo: h, size, base: sp.position.clone(), t0: 0, k: 0, hover: 0, ph: Math.random() * 6.28 };
+}
+ICONS.forEach(d => {
+  const p = PORTRAIT ? [d.pos[0] * .6, d.pos[1] * 1.3, d.pos[2]] : d.pos;
+  const it = makeIcon(d.art, d.size, p, true); it.def = d; it.sp.userData.icon = it; iconGroup.add(it.sp); clickables.push(it);
+});
+/* [KODE: ICN-DEC = 5E] stiker dekorasi lucu */
+const pick = arr => arr[(Math.random() * arr.length) | 0];
+const DECOR = [];
+const addDecor = (n, fn) => { for (let i = 0; i < n; i++) DECOR.push(fn()); };
+const maybeProp = pr => Math.random() < .4 ? { prop: pick(pr) } : {};
+addDecor(10, () => ({ kind: 'cat', fur: pick(['#ffffff', '#cfc4c0', '#ffe0ec', '#ffd9a8', '#e6dcff']), ...maybeProp(['cake', 'mail', 'clock']) }));
+addDecor(6, () => ({ kind: 'bear', fur: pick(['#e9c7a5', '#ffffff', '#ffd6e0']), ...maybeProp(['cake', 'mail']) }));
+addDecor(6, () => ({ kind: 'bunny', fur: pick(['#ffffff', '#ffe0ec', '#e6dcff']), ...maybeProp(['pray', 'mail']) }));
+addDecor(3, () => ({ kind: 'panda' }));
+addDecor(4, () => ({ kind: 'chick', fur: pick(['#ffe27a', '#ffd1e6']) }));
+addDecor(12, () => ({ kind: 'heart' }));
+addDecor(6, () => ({ kind: 'star' }));
+addDecor(4, () => ({ kind: 'planet' }));
+addDecor(3, () => ({ kind: 'cloud' }));
+DECOR.sort(() => Math.random() - .5);
+const decorPlaced = [];
+(KARTU.AKTIF_STIKER === false ? [] : DECOR).forEach(a => {
+  let p, d, best = null, bestD = -1;
+  for (let tries = 0; tries < 80; tries++) {
+    const an = Math.random() * Math.PI * 2; d = Math.sqrt(rand(46 * 46, 235 * 235));   // merata per luas, sampai jauh agar saat zoom out tidak kosong
+    p = [Math.cos(an) * d, d < 130 ? rand(3, 56) : rand(-4, 62), Math.sin(an) * d];
+    if (d < 130 && Math.abs(p[0]) < 38 && p[2] > -10) continue;                                   // jangan menutupi hati
+    const near = Math.min(...ICONS.map(ic => Math.hypot(p[0] - ic.pos[0], p[1] - ic.pos[1], p[2] - ic.pos[2]) - 6),
+      ...decorPlaced.map(q => Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2])));
+    if (near > bestD) { bestD = near; best = [p, d]; }
+    if (near >= 32) break;                                                                        // jarak minimal antar stiker
+  }
+  p = best[0]; d = best[1]; decorPlaced.push(p);
+  const sc = 1 + Math.max(0, d - 110) / 120;                                                       // yang jauh dibuat lebih besar agar tetap terlihat
+  const it = makeIcon(a, (a.kind === 'heart' ? rand(5, 8) : rand(8, 11)) * sc, p, false); decorGroup.add(it.sp); decor.push(it);
+});
+let iconsStart = null;
+
+/* ========================================================================
+   [KODE: AUD-01] MUSIK
+   ======================================================================== */
+const audio = new Audio(); audio.loop = true; audio.preload = 'auto'; audio.volume = CFG.VOLUME;
+let userPaused = false;
+const audioBox = $('#audio');
+audio.addEventListener('play', () => audioBox.classList.add('playing'));
+audio.addEventListener('pause', () => audioBox.classList.remove('playing'));
+$('#a-toggle').addEventListener('click', () => {      /* [KODE: AUD-02] play/pause */
+  if (audio.paused) { userPaused = false; audio.play().catch(() => {}); } else { userPaused = true; audio.pause(); }
+});
+$('#a-vol').value = CFG.VOLUME;
+$('#a-vol').addEventListener('input', e => { audio.volume = +e.target.value; });   /* [KODE: AUD-03] volume */
+function startMusic() {
+  if (!store.songUrl) return;
+  if (!audio.src) audio.src = store.songUrl;
+  audioBox.classList.add('in');
+  if (userPaused) return;
+  audio.play().catch(armMusicOnGesture);
+}
+/* Browser memblokir suara otomatis sebelum ada interaksi. Jika itu terjadi, lagu dimulai
+   pada sentuhan / klik / tombol keyboard PERTAMA (mis. saat mulai menggeser puzzle). */
+let musicArmed = false;
+function armMusicOnGesture() {
+  if (musicArmed) return; musicArmed = true;
+  const evs = ['pointerup', 'touchend', 'click', 'keydown'];
+  const off = () => evs.forEach(n => window.removeEventListener(n, go, true));
+  function go(e) {
+    if (e && e.target && e.target.closest && e.target.closest('#audio')) return;   // biar tombol play/pause bekerja normal
+    if (userPaused) return off();
+    audio.play().then(off).catch(() => {});
+  }
+  evs.forEach(n => window.addEventListener(n, go, true));
+}
+
+/* ========================================================================
+   [KODE: PZL-11] GAMBAR PUZZLE (dibuat otomatis bertema galaksi)
+   ======================================================================== */
+async function makePuzzleImage() {
+  try { await document.fonts.load('700 100px "Dancing Script"'); } catch (e) {}
+  const S = 720, c = document.createElement('canvas'); c.width = c.height = S; const x = c.getContext('2d');
+  let g = x.createLinearGradient(0, 0, S, S); g.addColorStop(0, '#04030d'); g.addColorStop(.5, '#150832'); g.addColorStop(1, '#2a0d4a'); x.fillStyle = g; x.fillRect(0, 0, S, S);
+  const cols = ['150,80,255', '255,90,170', '70,130,255', '40,200,255', '255,150,90'];
+  for (let i = 0; i < 18; i++) {
+    const bx = Math.random() * S, by = Math.random() * S, br = 110 + Math.random() * 230, col = cols[i % cols.length];
+    const rg = x.createRadialGradient(bx, by, 0, bx, by, br); rg.addColorStop(0, `rgba(${col},.32)`); rg.addColorStop(1, `rgba(${col},0)`); x.fillStyle = rg; x.fillRect(0, 0, S, S);
+  }
+  for (let i = 0; i < 2800; i++) { // spiral galaksi samar
+    const r = Math.pow(Math.random(), 1.4) * 340, a = (i % 3) * 2.094 + r * .017 + gauss() * .22;
+    const px = S / 2 + Math.cos(a) * r, py = S / 2 + Math.sin(a) * r * .75;
+    x.fillStyle = `rgba(${r < 90 ? '255,220,170' : '190,170,255'},${.15 + Math.random() * .4})`; x.fillRect(px, py, 1.6, 1.6);
+  }
+  for (let i = 0; i < 950; i++) { x.fillStyle = `rgba(255,255,255,${.25 + Math.random() * .75})`; const s = Math.random() < .06 ? 3 : 1.4; x.fillRect(Math.random() * S, Math.random() * S, s, s); }
+  for (let i = 0; i < 26; i++) { // bintang bercahaya
+    const sx = Math.random() * S, sy = Math.random() * S, rg = x.createRadialGradient(sx, sy, 0, sx, sy, 22);
+    rg.addColorStop(0, 'rgba(255,255,255,.95)'); rg.addColorStop(.25, 'rgba(200,190,255,.35)'); rg.addColorStop(1, 'rgba(160,140,255,0)'); x.fillStyle = rg; x.fillRect(sx - 22, sy - 22, 44, 44);
+  }
+  // hati bercahaya
+  x.save(); x.shadowColor = 'rgba(255,100,180,.95)'; x.shadowBlur = 50; x.beginPath();
+  for (let t = 0; t <= Math.PI * 2 + .02; t += .02) {
+    const hx = 16 * Math.pow(Math.sin(t), 3), hy = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+    const px = S / 2 + hx * 11.5, py = S * .47 - hy * 11.5; t === 0 ? x.moveTo(px, py) : x.lineTo(px, py);
+  }
+  x.closePath(); const hg = x.createLinearGradient(0, S * .25, 0, S * .7); hg.addColorStop(0, 'rgba(255,130,190,.88)'); hg.addColorStop(1, 'rgba(160,100,255,.8)');
+  x.fillStyle = hg; x.fill(); x.lineWidth = 3; x.strokeStyle = 'rgba(255,255,255,.7)'; x.stroke(); x.restore();
+  x.textAlign = 'center'; x.fillStyle = '#fff'; x.shadowColor = 'rgba(255,120,190,.95)'; x.shadowBlur = 24;
+  const fitTxt = (txt, font, px, maxW) => { x.font = font.replace('{px}', px); const w = x.measureText(txt).width; return w > maxW ? Math.max(24, Math.floor(px * maxW / w)) : px; };   // kecilkan otomatis bila terlalu lebar
+  const FN = '700 {px}px "Dancing Script","Segoe Script",cursive', FS = '600 {px}px "Dancing Script","Segoe Script",cursive';
+  x.font = FN.replace('{px}', fitTxt(DATA.name, FN, 150, 360)); x.fillText(DATA.name, S / 2, S * .52);
+  const topTxt = fill(KARTU.TEKS_GAMBAR_ATAS); x.font = FS.replace('{px}', fitTxt(topTxt, FS, 56, 640));
+  x.fillText(topTxt, S / 2, 100);
+  const botTxt = fill(KARTU.TEKS_GAMBAR_BAWAH); x.font = FS.replace('{px}', fitTxt(botTxt, FS, 46, 640)); x.fillText(botTxt, S / 2, S - 62);
+  return c.toDataURL('image/jpeg', .92);
+}
+
+/* ========================================================================
+   [KODE: PZL-10] LOGIKA PUZZLE (default 3x3, 1 kepingan hilang, geser-geser)
+   ======================================================================== */
+const Puzzle = {
+  N: CFG.PUZZLE_N, cells: [], tiles: [], started: false, solved: false, skipTimer: null,
+  async init() {
+    const N = this.N; this.board = $('#pzl-board'); this.EMPTY = N * N - 1;
+    const img = await makePuzzleImage(); this.sizeBoard();
+    for (let id = 0; id < N * N; id++) {
+      const t = document.createElement('div'); t.className = 'tile' + (id === this.EMPTY ? ' ghost' : '');
+      t.style.width = t.style.height = (100 / N) + '%';
+      t.style.backgroundImage = `url(${img})`; t.style.backgroundSize = `${N * 100}% ${N * 100}%`;
+      t.style.backgroundPosition = `${(id % N) / (N - 1) * 100}% ${Math.floor(id / N) / (N - 1) * 100}%`;
+      t.addEventListener('click', () => this.tap(id)); this.board.appendChild(t); this.tiles[id] = t;
+    }
+    this.cells = Array.from({ length: N * N }, (_, i) => i);
+    let last = -1, ep = this.EMPTY;
+    for (let s = 0; s < CFG.SHUFFLE || this.isSolved(); s++) {
+      const r = Math.floor(ep / N), c = ep % N, nb = [];
+      if (r > 0) nb.push(ep - N); if (r < N - 1) nb.push(ep + N); if (c > 0) nb.push(ep - 1); if (c < N - 1) nb.push(ep + 1);
+      const opts = nb.filter(p => p !== last), pick = opts[(Math.random() * opts.length) | 0];
+      this.cells[ep] = this.cells[pick]; this.cells[pick] = this.EMPTY; last = ep; ep = pick;
+    }
+    this.render(true);
+    window.addEventListener('keydown', e => this.key(e));
+  },
+  sizeBoard() {
+    const vw = innerWidth, vh = innerHeight, small = Math.min(vw, vh) < 600;   // HP
+    const bs = small
+      ? Math.min(vw * .76, vh * (vw > vh ? .5 : .40), 340)                    // HP: lebih kecil agar proporsional
+      : Math.min(vw * .9, vh * .54, 520);                                      // PC/tablet: tetap seperti semula
+    this.board.style.setProperty('--bs', Math.floor(bs) + 'px');
+  },
+  render() {
+    const N = this.N;
+    for (let id = 0; id < N * N; id++) { const p = this.cells.indexOf(id); this.tiles[id].style.left = (p % N) * 100 / N + '%'; this.tiles[id].style.top = Math.floor(p / N) * 100 / N + '%'; }
+  },
+  isSolved() { return this.cells.every((v, i) => v === i); },
+  tap(id) { if (!this.solved) this.move(id); },
+  move(id) {
+    const N = this.N, pos = this.cells.indexOf(id), ep = this.cells.indexOf(this.EMPTY);
+    const r = Math.floor(pos / N), c = pos % N, er = Math.floor(ep / N), ec = ep % N;
+    if (r === er && c !== ec) { const d = ec > c ? 1 : -1; for (let cc = ec; cc !== c; cc -= d) this.cells[r * N + cc] = this.cells[r * N + cc - d]; this.cells[r * N + c] = this.EMPTY; }
+    else if (c === ec && r !== er) { const d = er > r ? 1 : -1; for (let rr = er; rr !== r; rr -= d) this.cells[rr * N + c] = this.cells[(rr - d) * N + c]; this.cells[r * N + c] = this.EMPTY; }
+    else return false;
+    this.render(); this.onFirstMove();
+    if (this.isSolved()) this.finish(false);
+    return true;
+  },
+  key(e) {
+    if (state.stage !== 'puzzle' || this.solved) return;
+    const m = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key]; if (!m) return;
+    e.preventDefault(); const N = this.N, ep = this.cells.indexOf(this.EMPTY), er = Math.floor(ep / N), ec = ep % N, sr = er - m[1], sc = ec - m[0];
+    if (sr < 0 || sc < 0 || sr >= N || sc >= N) return; this.move(this.cells[sr * N + sc]);
+  },
+  /* [KODE: PZL-12] tombol skip: muncul 5 detik setelah mulai bermain; jika tidak main, tidak pernah muncul */
+  onFirstMove() {
+    if (this.started) return; this.started = true; if (KARTU.AKTIF_SKIP === false) return;
+    this.skipTimer = setTimeout(async () => {
+      if (this.solved) return;
+      const b = $('#btn-skip'); b.classList.add('in'); await typeEl(b.querySelector('span'), KARTU.TEKS_TOMBOL_SKIP);
+    }, CFG.SKIP_DELAY);
+  },
+  async finish(skipped) {
+    if (this.solved) return; this.solved = true; clearTimeout(this.skipTimer);
+    $('#btn-skip').classList.remove('in');
+    if (skipped) { this.cells = Array.from({ length: this.N * this.N }, (_, i) => i); this.render(); }
+    startMusic();
+    await sleep(skipped ? 1100 : 700);
+    this.board.classList.add('solved');
+    await sleep(1400);
+    typeEl($('#pzl-sub'), KARTU.PUZZLE_SELESAI);
+    await sleep(1500);
+    /* [KODE: PZL-13] tombol Masuk */
+    const m = $('#btn-masuk'); m.classList.add('in'); await typeEl(m.querySelector('span'), KARTU.TEKS_TOMBOL_MASUK);
+  }
+};
+$('#btn-skip').addEventListener('click', () => Puzzle.finish(true));
+$('#btn-masuk').addEventListener('click', () => enterGalaxy());
+
+/* ========================================================================
+   [KODE: MOD-01] MODAL
+   ======================================================================== */
+const Modal = {
+  el: $('#modal'), panel: $('#panel'), root: $('#mcontent'), tok: null, isOpen: false, anim: null, origin: null,
+  /* [KODE: MOD-ANIM] animasi ala macOS: jendela tumbuh dari emoji yang diketuk, lalu menyusut kembali ke emoji itu saat ditutup */
+  play(opening) {
+    if (!this.panel.animate) return sleep(opening ? 650 : 700);
+    if (this.anim) { this.anim.cancel(); this.anim = null; }                       // ukur dalam keadaan tanpa transformasi
+    const r = this.panel.getBoundingClientRect(), o = this.origin || { x: innerWidth / 2, y: innerHeight * .92 };
+    const dx = o.x - (r.left + r.width / 2), dy = o.y - (r.top + r.height / 2);
+    const away = `translate(${dx}px,${dy}px) scale(${this.origin ? '.08,.05' : '.85,.85'})`, home = 'translate(0px,0px) scale(1,1)';
+    const kf = opening
+      ? [{ transform: away, opacity: 0 }, { opacity: 1, offset: .3 }, { transform: home, opacity: 1 }]
+      : [{ transform: home, opacity: 1 }, { opacity: 1, offset: .6 }, { transform: away, opacity: 0 }];
+    const a = this.anim = this.panel.animate(kf, {
+      duration: opening ? 760 : 540, fill: 'both',
+      easing: opening ? 'cubic-bezier(.32,.72,0,1)' : 'cubic-bezier(.45,.05,.25,1)'
+    });
+    return a.finished.catch(() => {}).then(() => { if (opening && this.anim === a) { a.cancel(); this.anim = null; } });   // saat tutup: tetap tersembunyi sampai dibuka lagi
+  },
+  async open(builder, origin) {
+    if (this.isOpen) return; this.isOpen = true; controls.enabled = false; this.origin = origin || null;
+    const tok = this.tok = { cancel: false }; this.root.innerHTML = ''; this.panel.scrollTop = 0; $('#tip').classList.remove('in');
+    this.el.classList.add('show');
+    await this.play(true);
+    if (!tok.cancel) builder(this.root, tok, this.panel);
+  },
+  async close() {
+    if (!this.isOpen) return; this.isOpen = false; this.tok.cancel = true; this.el.classList.remove('show');
+    await this.play(false);
+    if (!this.isOpen) { this.root.innerHTML = ''; if (state.stage === 'explore') controls.enabled = true; }
+  }
+};
+$('#mclose').addEventListener('click', () => Modal.close());
+Modal.el.addEventListener('pointerdown', e => { if (e.target === Modal.el) Modal.close(); });
+window.addEventListener('keydown', e => { if (e.key === 'Escape') Modal.close(); if ((e.key === 'k' || e.key === 'K') && !Modal.isOpen && KARTU.TAMPILKAN_KODE !== false) toggleKode(); });
+
+/* [KODE: MOD-CD] hitung mundur */
+async function buildCountdown(root, tok, panel) {
+  root.innerHTML = `<h2 class="dance m-title glow" data-kode="6C"></h2><p class="m-sub"></p>
+  <div class="cd-grid fx"><div class="cd-box"><b id="cd-d">0</b><small>${esc(KARTU.UNIT_HARI)}</small></div><div class="cd-box"><b id="cd-h">0</b><small>${esc(KARTU.UNIT_JAM)}</small></div>
+  <div class="cd-box"><b id="cd-m">0</b><small>${esc(KARTU.UNIT_MENIT)}</small></div><div class="cd-box"><b id="cd-s">0</b><small>${esc(KARTU.UNIT_DETIK)}</small></div></div><p class="m-foot"></p>`;
+  const grid = root.querySelector('.cd-grid');
+  const upd = () => {
+    const now = new Date(), nb = nextBirthday(), end = new Date(nb.getTime() + 864e5);
+    let diff = nb - now, today = false;
+    if (now >= nb && now < end) { today = true; diff = 0; }
+    diff = Math.max(0, diff);
+    $('#cd-d') && ($('#cd-d').textContent = Math.floor(diff / 864e5));
+    $('#cd-h') && ($('#cd-h').textContent = String(Math.floor(diff / 36e5) % 24).padStart(2, '0'));
+    $('#cd-m') && ($('#cd-m').textContent = String(Math.floor(diff / 6e4) % 60).padStart(2, '0'));
+    $('#cd-s') && ($('#cd-s').textContent = String(Math.floor(diff / 1e3) % 60).padStart(2, '0'));
+    return today;
+  };
+  const nb = nextBirthday(), turning = nb.getFullYear() - (getBirthDate().getFullYear());
+  const dateStr = `${nb.getDate()} ${cap(MONTHS[nb.getMonth()])} ${nb.getFullYear()}`;
+  await typeEl(root.querySelector('h2'), fill(KARTU.JUDUL_HITUNG_MUNDUR), { tok }); if (tok.cancel) return;
+  await typeEl(root.querySelector('.m-sub'), fill(KARTU.SUB_HITUNG_MUNDUR, { tanggal: dateStr, usia: turning }), { tok, scroll: panel }); if (tok.cancel) return;
+  const today = upd(); grid.classList.add('in');
+  const iv = setInterval(() => { if (tok.cancel) return clearInterval(iv); upd(); }, 1000);
+  await sleep(1000);
+  await typeEl(root.querySelector('.m-foot'), fill(today ? KARTU.COUNTDOWN_HARI_H : KARTU.COUNTDOWN_BELUM), { tok, scroll: panel });
+}
+/* [KODE: MOD-SR] & [KODE: MOD-DO] surat (ucapan / harapan & doa) */
+async function buildLetter(root, tok, panel, text, code) {
+  const lines = (text || '').split('\n'); let i = 0; while (i < lines.length && !lines[i].trim()) i++;
+  const title = lines[i++] || '', paras = lines.slice(i).join('\n').trim().split(/\n\s*\n/).filter(s => s.trim());
+  root.innerHTML = `<h2 class="dance m-title glow" data-kode="${code}"></h2><div class="paper"></div>`;
+  await typeEl(root.querySelector('h2'), title, { tok }); if (tok.cancel) return;
+  await sleep(400);
+  const paper = root.querySelector('.paper');
+  for (const para of paras) {
+    if (tok.cancel) return; const p = document.createElement('p'); paper.appendChild(p);
+    await typeEl(p, para.trim(), { tok, scroll: panel }); await sleep(450);
+  }
+}
+/* [KODE: MOD-AG] umur sejak lahir */
+async function buildAge(root, tok, panel) {
+  const birth = getBirthDate();
+  root.innerHTML = `<h2 class="dance m-title glow" data-kode="6F"></h2><p class="m-sub"></p>
+  <div class="cd-grid three fx"><div class="cd-box"><b id="ag-y">0</b><small>${esc(KARTU.UNIT_TAHUN)}</small></div><div class="cd-box"><b id="ag-m">0</b><small>${esc(KARTU.UNIT_BULAN)}</small></div><div class="cd-box"><b id="ag-d">0</b><small>${esc(KARTU.UNIT_HARI)}</small></div></div>
+  <div class="totals fx"><div><span>${esc(KARTU.TOTAL_HARI)}</span><b id="ag-td">0</b></div><div><span>${esc(KARTU.TOTAL_JAM)}</span><b id="ag-th">0</b></div><div><span>${esc(KARTU.TOTAL_MENIT)}</span><b id="ag-tm">0</b></div><div><span>${esc(KARTU.TOTAL_DETIK)}</span><b id="ag-ts">0</b></div></div>
+  <p class="m-foot"></p>`;
+  const fmt = n => n.toLocaleString('id-ID');
+  const upd = () => {
+    const now = new Date(), a = ymd(birth, now), ms = now - birth;
+    const set = (id, v) => { const e = $(id); if (e) e.textContent = v; };
+    set('#ag-y', a.y); set('#ag-m', a.m); set('#ag-d', a.d);
+    set('#ag-td', fmt(Math.floor(ms / 864e5))); set('#ag-th', fmt(Math.floor(ms / 36e5))); set('#ag-tm', fmt(Math.floor(ms / 6e4))); set('#ag-ts', fmt(Math.floor(ms / 1e3)));
+  };
+  await typeEl(root.querySelector('h2'), fill(KARTU.JUDUL_UMUR), { tok }); if (tok.cancel) return;
+  await typeEl(root.querySelector('.m-sub'), fill(KARTU.SUB_UMUR, { tanggal_lahir: `${birth.getDate()} ${cap(MONTHS[birth.getMonth()])} ${birth.getFullYear()}` }), { tok, scroll: panel }); if (tok.cancel) return;
+  upd(); root.querySelector('.cd-grid').classList.add('in'); await sleep(900); root.querySelector('.totals').classList.add('in');
+  const iv = setInterval(() => { if (tok.cancel) return clearInterval(iv); upd(); }, 1000);
+  await sleep(1200);
+  await typeEl(root.querySelector('.m-foot'), fill(KARTU.PENUTUP_UMUR), { tok, scroll: panel });
+}
+function iconScreenPos(it) {
+  camera.updateMatrixWorld();
+  const v = it.sp.getWorldPosition(new THREE.Vector3()).project(camera);
+  return { x: (v.x * .5 + .5) * innerWidth, y: (-v.y * .5 + .5) * innerHeight };
+}
+function openIcon(type, origin) {
+  state.modalCode = { countdown: '6C', letter: '6D', prayer: '6E', age: '6F' }[type];
+  if (type === 'countdown') Modal.open(buildCountdown, origin);
+  else if (type === 'letter') Modal.open((r, t, p) => buildLetter(r, t, p, DATA.letter, '6D'), origin);
+  else if (type === 'prayer') Modal.open((r, t, p) => buildLetter(r, t, p, DATA.prayer, '6E'), origin);
+  else if (type === 'age') Modal.open(buildAge, origin);
+}
+
+/* ========================================================================
+   [KODE: ICN-01] interaksi klik / hover emoji
+   ======================================================================== */
+/* ========================================================================
+   [KODE: MEM-01 = 4I] FOTO POLAROID: ketuk tulisan di tengah hati → latar blur, tali & polaroid turun (memantul) dari bawah judul,
+   tampil sesaat, lalu naik (turun sedikit dulu) dan kembali ke galaksi.  Foto: FOTO_KENANGAN di CUS-01.
+   ======================================================================== */
+const Memo = (() => {
+  const box = $('#memo'), rail = $('#memo-rail'), title = $('#title3d'), PHOTOS = KARTU.FOTO_KENANGAN || [];
+  const M = { ready: false, active: false };
+  const IN_DELAY = 500, IN_STAG = 220, IN_DUR = 1700, OUT_STAG = 120, OUT_DUR = 1150, AY = 7;
+  let cards = [], knot = null, built = false, W = 0, H = 0, ax = 0, railH = 0;
+  const el = (tag, cls) => { const e = document.createElement(tag); e.className = cls; return e; };
+  const ease = u => .5 - .5 * Math.cos(Math.PI * u);                       // halus di awal & akhir
+  function placeholder(i, name) {
+    const c = document.createElement('canvas'); c.width = c.height = 360; const x = c.getContext('2d');
+    const g = x.createLinearGradient(0, 0, 360, 360); g.addColorStop(0, '#ff9ac6'); g.addColorStop(1, '#7a5cff'); x.fillStyle = g; x.fillRect(0, 0, 360, 360);
+    x.textAlign = 'center'; x.fillStyle = '#fff'; x.font = '110px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; x.fillText('📷', 180, 190);
+    x.font = 'bold 26px sans-serif'; x.fillText(name, 180, 260); return c.toDataURL();
+  }
+  function build() {
+    built = true; rail.textContent = ''; knot = el('div', 'mknot'); rail.appendChild(knot);
+    PHOTOS.forEach((name, i) => {
+      const str = el('div', 'mstring'), card = el('div', 'mcard'), pol = el('div', 'mpol'), pin = el('div', 'mpin');
+      const img = new Image(); img.alt = ''; img.draggable = false; img.src = store.memo[i] || placeholder(i, name);
+      pol.appendChild(img); pol.appendChild(pin); card.appendChild(pol); rail.appendChild(str); rail.appendChild(card);
+      cards.push({ str, card, pol, img, x: 0, y1: 0, base: [-4, 3, -2.5, 4.5, -3.5, 2.5][i % 6], ph: 0, inAt: 0, outAt: 0 });
+    });
+  }
+  function layout() {
+    const n = cards.length; if (!n) return;
+    const tb = title.getBoundingClientRect().bottom + 8;                    // tali keluar tepat dari bawah kalimat judul
+    rail.style.top = tb + 'px'; railH = innerHeight - tb; ax = innerWidth / 2;
+    const portrait = innerWidth < 700, cols = portrait ? Math.min(2, n) : Math.min(4, n), rows = Math.ceil(n / cols), gap = 1.14, rowGap = 1.08;
+    W = Math.max(88, Math.min(230, innerWidth * .94 / (cols * gap), (railH * .9 / (rows * rowGap + .18)) / 1.16)); H = W * 1.16;
+    const stag = [0, .16, .05, .2, .1, .18].map(v => v * H); let minT = 1e9, maxB = -1e9;
+    cards.forEach((c, i) => {
+      const col = i % cols, row = (i / cols) | 0, inRow = row === rows - 1 ? n - row * cols : cols;
+      c.x = ax + (col - (inRow - 1) / 2) * W * gap; c.y1 = row * H * rowGap + stag[i % 6];
+      minT = Math.min(minT, c.y1); maxB = Math.max(maxB, c.y1 + H);
+    });
+    const shift = Math.max(64, (railH - (maxB - minT)) / 2 - minT - railH * .04); cards.forEach(c => { c.y1 += shift; });
+    const pad = W * .06, bot = W * .2;
+    cards.forEach(c => { c.pol.style.width = W + 'px'; c.pol.style.height = H + 'px'; c.pol.style.left = (-W / 2) + 'px'; c.pol.style.padding = pad + 'px ' + pad + 'px ' + bot + 'px'; });
+    knot.style.left = (ax - 5) + 'px'; knot.style.top = (AY - 5) + 'px';
+  }
+  function setCard(c, y, ang, show, strOp) {
+    const d = show ? 'block' : 'none'; c.card.style.display = d; c.str.style.display = d; if (!show) return;
+    c.card.style.transform = 'translate(' + c.x + 'px,' + y + 'px)'; c.pol.style.transform = 'rotate(' + ang + 'deg)';
+    const dx = c.x - ax, dy = y - AY;
+    c.str.style.height = Math.hypot(dx, dy) + 'px'; c.str.style.transform = 'translate(' + ax + 'px,' + AY + 'px) rotate(' + Math.atan2(-dx, dy) + 'rad)'; c.str.style.opacity = strOp;
+  }
+  function tick(now) {
+    let alive = 0; const top = -(H + 70);
+    cards.forEach(c => {
+      if (now < c.inAt) { setCard(c, 0, 0, false); alive++; return; }
+      const ts = (now - c.inAt) / 1000; let y, strOp = 1, ang = c.base + (2 + 5 * Math.exp(-ts / 1.4)) * Math.sin(ts * 2.1 + c.ph);
+      if (now < c.outAt) {            // MASUK: turun, melewati titik akhir, memantul naik-turun, lalu tenang
+        const p = Math.min(1, ts * 1000 / IN_DUR), ov = Math.max(18, H * .14);
+        const K = [[0, top], [.36, c.y1 + ov], [.58, c.y1 - ov * .38], [.78, c.y1 + ov * .14], [1, c.y1]]; y = c.y1;
+        for (let k = 1; k < K.length; k++) if (p <= K[k][0]) { const u = (p - K[k - 1][0]) / (K[k][0] - K[k - 1][0]); y = K[k - 1][1] + (K[k][1] - K[k - 1][1]) * ease(u); break; }
+      } else {                        // KELUAR: turun sedikit dulu, baru melesat naik ke bawah judul
+        const q = Math.min(1, (now - c.outAt) / OUT_DUR), yd = c.y1 + Math.max(26, H * .15), a = .26;
+        y = q < a ? c.y1 + (yd - c.y1) * Math.sin(q / a * Math.PI / 2) : yd + (top - yd) * Math.pow((q - a) / (1 - a), 3);
+        ang *= 1 - .7 * q; strOp = 1 - Math.max(0, (q - .75) / .25);
+        if (q >= 1) { setCard(c, 0, 0, false); return; }
+      }
+      setCard(c, y, ang, true, strOp); alive++;
+    });
+    return alive;
+  }
+  M.open = async () => {
+    if (M.active || !M.ready || !PHOTOS.length) return;
+    M.active = true; $('#tip').classList.remove('in');
+    if (!built) build();
+    document.body.classList.add('memo-on'); layout(); box.classList.add('on');
+    const t0 = performance.now(), n = cards.length;
+    const hold = t0 + IN_DELAY + (n - 1) * IN_STAG + IN_DUR * .85 + KARTU.DURASI_FOTO * 1000;
+    cards.forEach((c, i) => { c.inAt = t0 + IN_DELAY + i * IN_STAG; c.outAt = hold + i * OUT_STAG; c.ph = Math.random() * 6.28; });
+    await new Promise(done => { const loop = now => { const alive = tick(now); if (now > hold && alive === 0) return done(); requestAnimationFrame(loop); }; requestAnimationFrame(loop); });
+    await sleep(150); box.classList.remove('on'); await sleep(1000);
+    document.body.classList.remove('memo-on'); M.active = false;
+  };
+  addEventListener('resize', () => { if (M.active && cards.length) layout(); });
+  return M;
+})();
+function pickHeartText() {
+  if (!Memo.ready || Memo.active || !heartHit) return false;
+  ray.setFromCamera(ptr, camera); return ray.intersectObject(heartHit).length > 0;
+}
+const ray = new THREE.Raycaster(), ptr = new THREE.Vector2(); let ptrMoved = false, hoverIcon = null, down = null;
+const tip = $('#tip');
+canvas.addEventListener('pointermove', e => { ptr.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ptrMoved = true; tip.style.left = e.clientX + 'px'; tip.style.top = e.clientY + 'px'; });
+canvas.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; ptr.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); });
+canvas.addEventListener('pointerup', e => {
+  if (!down || state.stage !== 'explore' || Modal.isOpen) return;
+  const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y); down = null; if (moved > 8) return;
+  ptr.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+  const hit = pickIcon(); if (hit) openIcon(hit.def.type, iconScreenPos(hit));
+  else if (pickHeartText()) Memo.open();
+});
+canvas.addEventListener('pointerleave', () => { hoverIcon = null; tip.classList.remove('in'); });
+function pickIcon() {
+  ray.setFromCamera(ptr, camera);
+  const objs = clickables.filter(c => c.k > .6).map(c => c.sp), hits = ray.intersectObjects(objs);
+  return hits.length ? hits[0].object.userData.icon : null;
+}
+
+/* ========================================================================
+   [KODE: KOD-01] LABEL KODE
+   ======================================================================== */
+const badges = []; let kodeTimer = null;
+function toggleKode() {
+  document.body.classList.toggle('show-kode');
+  if (document.body.classList.contains('show-kode')) { updateBadges(); kodeTimer = setInterval(updateBadges, 300); }
+  else { clearInterval(kodeTimer); badges.forEach(b => b.remove()); badges.length = 0; }
+}
+function updateBadges() {
+  let n = 0;
+  const place = (text, left, top) => {
+    let b = badges[n]; if (!b) { b = document.createElement('div'); b.className = 'kbadge'; document.body.appendChild(b); badges[n] = b; }
+    b.textContent = text; b.style.left = Math.max(2, left) + 'px'; b.style.top = Math.max(2, top - 12) + 'px'; b.style.display = 'block'; n++;
+  };
+  for (const el of document.querySelectorAll('[data-kode]')) {
+    const r = el.getBoundingClientRect(), cs = getComputedStyle(el);
+    if (r.width < 2 || r.height < 2 || cs.visibility === 'hidden' || r.bottom < 0 || r.top > innerHeight) continue;
+    place(el.dataset.kode, r.left, r.top);
+  }
+  if (state.stage === 'explore' && !Modal.isOpen) {   // label untuk objek 3D
+    const put = (code, v) => { const q = v.clone().project(camera); if (q.z > 1 || Math.abs(q.x) > 1 || Math.abs(q.y) > 1) return; place(code, (q.x * .5 + .5) * innerWidth, (-q.y * .5 + .5) * innerHeight); };
+    [['4B', [46, 0, 22]], ['4C', [0, .5, 0]], ['4D', [-24, 52, 0]], ['4E', [0, 34, 0]]].forEach(a => put(a[0], new THREE.Vector3(...a[1])));
+    clickables.forEach(it => { if (it.k > .5) put(it.def.code, it.sp.position); });
+    decor.forEach(it => { if (it.sp.material.opacity > .5) put('5E', it.sp.getWorldPosition(new THREE.Vector3())); });
+  }
+  for (let i = n; i < badges.length; i++) badges[i].style.display = 'none';
+}
+/* kode layar yang sedang tampil, kecil di pojok kiri bawah */
+const kodeNowEl = $('#kode-now'); let kodeNowTxt = '';
+function partCodes() {
+  if (Modal.isOpen) return state.modalCode || '6C';
+  switch (state.stage) {
+    case 'loading': return '1A';
+    case 'puzzle': return '2A';
+    case 'warp-prep': case 'warp': return '3A';
+    case 'arrived': case 'explore': return '4A';
+  }
+  return '';
+}
+function refreshKodeNow() {
+  const t = partCodes(); if (t === kodeNowTxt) return; kodeNowTxt = t;
+  kodeNowEl.style.opacity = 0; setTimeout(() => { kodeNowEl.textContent = t; kodeNowEl.style.opacity = ''; }, 260);
+}
+$('#kode-btn').addEventListener('click', toggleKode);
+
+/* ========================================================================
+   [KODE: HNT-01] petunjuk bawah & judul 3D
+   ======================================================================== */
+async function setHint(text) {
+  const h = $('#hint'); h.classList.remove('in'); await sleep(900);
+  h.classList.add('in'); await typeEl(h, text);
+}
+
+/* ========================================================================
+   [KODE: WRP-10] MASUK → PERJALANAN KE GALAKSI TERBESAR
+   ======================================================================== */
+const LOOK_Y = 22;   // kamera menatap titik setinggi ini (di antara galaksi & hati)
+/* [KODE: 4F] judul "Happy ... Birthday" diletakkan tepat di tengah antara tepi atas layar dan puncak hati,
+   dihitung dari posisi kamera awal (jadi proporsional di HP maupun PC) */
+function placeTitle() {
+  const asp = innerWidth / innerHeight, D = Math.max(95, 74 / (Math.tan(THREE.MathUtils.degToRad(30)) * asp));
+  const c = new THREE.PerspectiveCamera(60, asp, .1, 40000);
+  c.position.set(0, LOOK_Y + D * .36, D); c.lookAt(0, LOOK_Y, 0); c.updateMatrixWorld(); c.updateProjectionMatrix();
+  const top = new THREE.Vector3(0, 60, 0).project(c);                 // puncak hati
+  const topPx = (-top.y * .5 + .5) * innerHeight;
+  $('#title3d').style.top = Math.max(34, topPx / 2) + 'px';            // transform:translateY(-50%) membuat teksnya rata tengah
+}
+const warp = { active: false, t0: 0, dur: 9000, prevZ: 4200, finalPos: new THREE.Vector3(0, 30, 140), startPos: new THREE.Vector3(0, 260, 4200) };
+async function enterGalaxy() {
+  if (state.stage !== 'puzzle') return; state.stage = 'warp-prep';
+  if (store.songUrl && audio.paused && !userPaused) audio.play().catch(() => {});
+  $('#btn-masuk').classList.remove('in'); $('#puzzle').classList.remove('show');
+  await sleep(1400);
+  const asp = innerWidth / innerHeight, D = Math.max(95, 74 / (Math.tan(THREE.MathUtils.degToRad(30)) * asp));
+  warp.finalPos.set(0, LOOK_Y + D * .36, D);
+  $('#warp').classList.add('show');
+  warp.active = true; warp.t0 = performance.now(); state.stage = 'warp';
+  await sleep(500);
+  const w = $('#warp-text'); w.style.transition = 'opacity 1s'; w.style.opacity = 1;
+  await typeEl(w, KARTU.TEKS_PERJALANAN, { keepCaret: false });
+}
+async function onArrive() {
+  state.stage = 'arrived';
+  $('#warp').classList.remove('show');
+  controls.target.set(0, LOOK_Y, 0); camera.position.copy(warp.finalPos); controls.update(); controls.enabled = true; state.stage = 'explore';
+  placeTitle();
+  await sleep(1200);
+  heartT0 = performance.now();                       // mulai ribuan bintang keluar dari tengah galaksi
+  await sleep(5200);
+  const t = $('#title3d'); t.classList.add('in');
+  await typeEl(t, fill(KARTU.JUDUL_GALAKSI));
+  iconsStart = performance.now() + 1500;
+  /* petunjuk BARU muncul setelah animasi hati selesai & stiker tampil (satu kali saja, tanpa tulisan saat animasi) */
+  await sleep(Math.max(0, Math.max(iconsStart + 3500, heartT0 + 12800) - performance.now()));
+  setHint([clickables.length ? KARTU.PETUNJUK_GALAKSI_1 : '', KARTU.PETUNJUK_GALAKSI_2].map(t => fill(t)).filter(Boolean).join('\n'));
+  Memo.ready = true;   // tulisan di tengah hati baru bisa diketuk setelah semua animasi selesai
+}
+
+/* ========================================================================
+   LOOP RENDER
+   ======================================================================== */
+let last = performance.now();
+const v3 = new THREE.Vector3();
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dt = Math.min(.05, (now - last) / 1000); last = now; U.uTime.value += dt;
+  bg.rotation.y += dt * .004; galaxySpin.rotation.y += dt * .018;
+  /* warp */
+  let speed = 0, streakI = 0;
+  if (warp.active) {
+    const p = clamp((now - warp.t0) / warp.dur, 0, 1), e = easeIO3(p);
+    const z = warp.startPos.z + (warp.finalPos.z - warp.startPos.z) * e;
+    camera.position.set(Math.sin(p * Math.PI) * 150 * (1 - e) + warp.finalPos.x * e, warp.startPos.y + (warp.finalPos.y - warp.startPos.y) * e, z);
+    camera.lookAt(0, LOOK_Y * e, 0);
+    speed = Math.abs(z - warp.prevZ) / Math.max(dt, .001); warp.prevZ = z;
+    streakI = clamp(speed / 650, 0, 1) * .85;
+    const dist = camera.position.length(), a = smooth(0, 1, clamp((2300 - dist) / 1900, 0, 1));
+    GA.value = a; galaxyTilt.visible = a > .001; [coreGlow, coreGlow2].forEach(s => { s.visible = a > .001; s.material.opacity = a * s.userData.op; });
+    holeRing.visible = a > .001; holeRing.material.opacity = a;
+    if (p >= 1) { warp.active = false; strMat.opacity = 0; GA.value = 1; onArrive(); }
+  }
+  updateStreaks(speed, dt, streakI);
+  refreshKodeNow();
+  /* hati */
+  if (heartT0 !== null) {
+    const t = (now - heartT0) / 1000; heartMat.uniforms.uT.value = t;
+    const ph = (t * 1.1) % 1; heartMat.uniforms.uBeat.value = 1 + .028 * Math.exp(-ph * 7) * Math.sin(ph * Math.PI * 1.0 + .5) * (t > 10 ? 1 : 0) + (t > 10 ? .012 * Math.sin(t * 2.2) : 0);
+    heartGlow.material.opacity = smooth(3, 11, t) * (.32 + .08 * Math.sin(t * 2.2));
+    heartPts.rotation.y = .32 * Math.sin(t * .28) * smooth(8, 14, t);
+  }
+  /* ikon emoji */
+  if (iconsStart !== null) {
+    const hov = (state.stage === 'explore' && !Modal.isOpen) ? hoverIcon : null;
+    clickables.forEach((it, i) => {
+      const k = clamp((now - iconsStart - i * 450) / 1500, 0, 1); it.k = k;
+      const sc = it.size * easeOutBack(k) * (1 + .22 * it.hover); it.hover += ((hov === it ? 1 : 0) - it.hover) * .15;
+      it.sp.scale.set(Math.max(sc, .01), Math.max(sc, .01), 1); it.sp.material.opacity = k;
+      it.sp.position.set(it.base.x, it.base.y + Math.sin(U.uTime.value * 1.1 + it.ph) * 1.3, it.base.z);
+      it.halo.position.copy(it.sp.position); const hs = it.size * 2.1 * (1 + .12 * Math.sin(U.uTime.value * 2.2 + it.ph)); it.halo.scale.set(hs * k, hs * k, 1); it.halo.material.opacity = k * (.55 + .3 * it.hover);
+    });
+    decorGroup.rotation.y += dt * .012;
+    decor.forEach((it, i) => {
+      const k = clamp((now - iconsStart - 1000 - Math.min(i * 130, 5500)) / 1800, 0, 1), sc = it.size * easeOutBack(k);
+      it.sp.scale.set(Math.max(sc, .01), Math.max(sc, .01), 1); it.sp.material.opacity = k * .95;
+      it.sp.position.y = it.base.y + Math.sin(U.uTime.value * .8 + it.ph) * 1.6;
+    });
+  }
+  /* hover */
+  if (ptrMoved && state.stage === 'explore' && !Modal.isOpen) {
+    ptrMoved = false; const h = pickIcon(); hoverIcon = h;
+    if (h) { tip.textContent = h.def.label + (document.body.classList.contains('show-kode') ? '  [' + h.def.code + ']' : ''); tip.classList.add('in'); canvas.style.cursor = 'pointer'; }
+    else if (pickHeartText()) { tip.textContent = KARTU.LABEL_FOTO + (document.body.classList.contains('show-kode') ? '  [4I]' : ''); tip.classList.add('in'); canvas.style.cursor = 'pointer'; }
+    else { tip.classList.remove('in'); canvas.style.cursor = 'grab'; }
+  }
+  if (controls.enabled) controls.update();
+  renderer.render(scene, camera);
+}
+requestAnimationFrame(frame);
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight);
+  U.uScale.value = innerHeight / (2 * Math.tan(THREE.MathUtils.degToRad(30))); if (Puzzle.board) Puzzle.sizeBoard();
+  if (state.stage === 'explore') placeTitle();
+});
+
+/* ========================================================================
+   [KODE: LOAD-01..06] ALUR UTAMA
+   ======================================================================== */
+(async function main() {
+  $('#loader').classList.add('show');
+  await sleep(700);
+  const loading = loadAll();
+  await typeEl($('#load-title'), KARTU.TEKS_LOADING, { keepCaret: true });
+  $('#load-wrap').classList.add('in');
+  let shown = 0;
+  await new Promise(res => {
+    const tick = () => {
+      const t = totalProgress() * 100;
+      if (store.fatal) return res();
+      shown += Math.max((t - shown) * .07, t > shown ? .12 : 0); if (shown > t) shown = t;
+      $('#load-pct').textContent = Math.floor(shown) + '%'; $('#load-fill').style.width = shown + '%';
+      if (shown >= 99.9 && t >= 100) return res();
+      requestAnimationFrame(tick);
+    };
+    tick();
+  });
+  await loading;
+  if (store.fatal) { await typeEl($('#load-note'), store.fatal, { speed: 25 }); return; }
+  $('#load-pct').textContent = '100%'; $('#load-fill').style.width = '100%';
+  startMusic();                                     /* musik langsung diputar begitu loading selesai */
+  if (store.notes.length) { await sleep(400); await typeEl($('#load-note'), store.notes.join(' '), { speed: 25 }); }
+  await sleep(900);
+  $('#loader').classList.remove('show');
+  if (KARTU.AKTIF_PUZZLE === false) { state.stage = 'puzzle'; enterGalaxy(); return; }
+  await Puzzle.init();
+  await sleep(1300);
+  state.stage = 'puzzle';
+  $('#puzzle').classList.add('show');
+  await sleep(900);
+  typeEl($('#pzl-title'), fill(KARTU.JUDUL_PUZZLE));
+  await sleep(1400);
+  $('#pzl-board').classList.add('in');
+  await typeEl($('#pzl-sub'), KARTU.PETUNJUK_PUZZLE);
+})();
+</script>
+</body>
+</html>
